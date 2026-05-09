@@ -46,6 +46,8 @@ class TabelasPage {
     this.colEmpresa      = page.getByRole('columnheader', { name: 'Empresa' })
     this.colDepartamento = page.getByRole('columnheader', { name: 'Departamento' })
     this.colLinhas       = page.getByRole('columnheader', { name: 'Linhas' })
+    this.colCriadaEm     = page.getByRole('columnheader', { name: 'Criada em' })
+    this.colAlteradaEm   = page.getByRole('columnheader', { name: 'Alterada em' })
     this.colAcoes        = page.getByRole('columnheader', { name: 'Ações' })
 
     // Primeiro botão "Abrir" — usado apenas para checar existência de tabelas

@@ -31,6 +31,8 @@ test.describe('InTable — Smoke @readonly', () => {
     await expect(tabelasPage.colEmpresa).toBeVisible()
     await expect(tabelasPage.colDepartamento).toBeVisible()
     await expect(tabelasPage.colLinhas).toBeVisible()
+    await expect(tabelasPage.colCriadaEm).toBeVisible()
+    await expect(tabelasPage.colAlteradaEm).toBeVisible()
     await expect(tabelasPage.colAcoes).toBeVisible()
 
     // Deve haver pelo menos uma tabela (botão "Abrir")
