@@ -79,12 +79,18 @@ npx playwright codegen \
 
 ## Cobertura atual
 
-- Login via storageState com cache guard (reutiliza sessão existente)
-- Home com seleção de empresa (`inbot`)
-- Acesso à lista de tabelas (`/tables`)
-- Validação de tabela, cabeçalhos, botão "Atualizar tabelas" e paginação
-- Expansão do painel de filtros
-- Filtro por departamento `testes`
+**7 testes `@readonly` estáveis**, todos passando em execuções repetidas.
+
+| Spec | Cenário |
+|---|---|
+| `smoke.spec.js` | Carregamento de `/tables`: cabeçalhos, botão atualizar, paginação, botão Abrir |
+| `smoke.spec.js` | Expansão do painel de filtros e visibilidade dos controles |
+| `filtros.spec.js` | Filtro por departamento `testes` e validação de resultado |
+| `busca.spec.js` | Busca por nome de tabela e limpeza do campo |
+| `paginacao.spec.js` | Navegação para próxima página e retorno (skip automático se uma página só) |
+| `visualizacao.spec.js` | Abertura da primeira tabela, validação de grid ou empty state, retorno à lista |
+
+Setup: autenticação via Azure/Inbot SSO com cache guard — `fixtures/.auth/user.json` reutilizado enquanto válido.
 
 ---
 
@@ -99,6 +105,13 @@ Os testes existentes são **exclusivamente readonly**. Os fluxos abaixo ainda n�
 - Importação
 - Exportação
 - Qualquer fluxo destrutivo
+
+---
+
+## Estabilidade
+
+- Testes readonly passam consistentemente em execuções repetidas.
+- `ERR_NETWORK_CHANGED` pode ocorrer esporadicamente por blip de rede/VPN durante `goto()`. O `retries: 1` do config trata esses casos; se o erro se tornar recorrente, investigar a infraestrutura de rede — não mascarar com retries adicionais.
 
 ---
 
@@ -126,8 +139,7 @@ Os testes existentes são **exclusivamente readonly**. Os fluxos abaixo ainda n�
 
 ## Próximos passos recomendados
 
-1. Busca por nome de tabela (campo "Buscar tabelas...")
-2. Paginação readonly (Próx / Ant, tamanho de página)
-3. Empty state (filtro sem resultado)
-4. Abrir tabela em modo readonly (visualizar colunas e dados)
-5. Somente após os itens acima: fluxos destrutivos com `ENABLE_DESTRUCTIVE=true`
+1. Empty state explícito (filtro sem resultado, tabela sem linhas)
+2. Ordenação de colunas readonly (clicar no cabeçalho, validar inversão da ordem)
+3. Tamanho de página (combobox "10 itens" → alterar e validar que a lista recarrega)
+4. Somente após cobrir os itens acima: fluxos com escrita usando `ENABLE_DESTRUCTIVE=true`
