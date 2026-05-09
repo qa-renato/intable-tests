@@ -59,6 +59,12 @@ class TabelasPage {
     this.paginacaoInfo = page.getByText(/Mostrando \d+-\d+ de \d+ itens/)
     this.btnProximo    = page.getByRole('button', { name: 'Prox' })
     this.btnAnterior   = page.getByRole('button', { name: 'Ant' })
+
+    // Combobox de tamanho de página — único combobox da tela de lista
+    // Confirmado via DOM snapshot: role=combobox, texto interno "10 itens"
+    // TODO: solicitar ao time de front-end aria-label="Itens por página" para eliminar
+    // dependência de posição e melhorar acessibilidade.
+    this.tamanhoPaginaCombobox = page.getByRole('combobox')
   }
 
   /**
@@ -178,6 +184,24 @@ class TabelasPage {
   async limparBuscaTabela() {
     await this.buscarTabelasInput.fill('')
     await this.page.waitForLoadState('networkidle')
+  }
+
+  /**
+   * Abre o combobox de tamanho de página e seleciona a opção indicada.
+   * Retorna false (sem click) se a opção não aparecer — permite test.skip no caller.
+   * @param {string} label  Texto exato da opção, ex: "25 itens"
+   * @returns {Promise<boolean>} true se selecionou, false se opção não disponível
+   */
+  async alterarTamanhoPagina(label) {
+    await this.tamanhoPaginaCombobox.click()
+    const opcao = this.page.getByRole('option', { name: label, exact: true })
+    const disponivel = await opcao.isVisible({ timeout: 3_000 }).catch(() => false)
+    if (!disponivel) {
+      await this.page.keyboard.press('Escape')
+      return false
+    }
+    await opcao.click()
+    return true
   }
 }
 
