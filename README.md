@@ -1,0 +1,133 @@
+# InTable Tests
+
+Automação E2E com Playwright para o InTable.
+Alvo: `https://intable.inbot.com.br`.
+Foco atual: smoke e validações readonly.
+
+---
+
+## Stack
+
+- Node.js
+- Playwright
+- JavaScript
+
+---
+
+## Estrutura do projeto
+
+```
+fixtures/           # Setup global de autenticação e extensões de fixture
+pages/              # Page objects (seletores e métodos por tela)
+tests/              # Specs organizados por funcionalidade
+evidencias/         # Artefatos de teste — NÃO versionado (.gitignore)
+playwright.config.js
+package.json
+```
+
+---
+
+## Autenticação
+
+O login usa Azure/Inbot SSO (Keycloak → Microsoft → redirect para o app).
+As credenciais são passadas **exclusivamente por variáveis de ambiente** — nunca em código ou arquivos versionados.
+
+```bash
+export USER_EMAIL="seu.email@empresa.com"
+read -s USER_PASSWORD && export USER_PASSWORD
+```
+
+---
+
+## Gerar sessão autenticada
+
+Executa o setup e salva o `storageState` em `fixtures/.auth/user.json`.
+Na próxima execução, o cache é reutilizado automaticamente enquanto os cookies forem válidos.
+
+```bash
+BASE_URL=https://intable.inbot.com.br \
+USER_EMAIL="$USER_EMAIL" \
+USER_PASSWORD="$USER_PASSWORD" \
+npx playwright test --project=setup --reporter=line
+```
+
+Para forçar novo login, delete `fixtures/.auth/user.json` antes de rodar o setup.
+
+---
+
+## Rodar testes readonly
+
+```bash
+BASE_URL=https://intable.inbot.com.br \
+ENABLE_DESTRUCTIVE=false \
+npx playwright test --grep "@readonly" --reporter=line
+```
+
+---
+
+## Rodar codegen autenticado
+
+Abre o browser com a sessão já ativa, sem precisar logar de novo:
+
+```bash
+npx playwright codegen \
+  --load-storage=fixtures/.auth/user.json \
+  https://intable.inbot.com.br/
+```
+
+---
+
+## Cobertura atual
+
+- Login via storageState com cache guard (reutiliza sessão existente)
+- Home com seleção de empresa (`inbot`)
+- Acesso à lista de tabelas (`/tables`)
+- Validação de tabela, cabeçalhos, botão "Atualizar tabelas" e paginação
+- Expansão do painel de filtros
+- Filtro por departamento `testes`
+
+---
+
+## Fora do escopo atual
+
+Os testes existentes são **exclusivamente readonly**. Os fluxos abaixo ainda não têm cobertura:
+
+- Criação de tabela
+- Criação de coluna
+- Adição de linha
+- Exclusão
+- Importação
+- Exportação
+- Qualquer fluxo destrutivo
+
+---
+
+## Segurança
+
+- Nunca commitar `fixtures/.auth/user.json` (contém cookies de sessão)
+- Nunca commitar `.env`
+- Nunca commitar `evidencias/`, traces, vídeos ou screenshots
+- Nunca hardcodar senha em código ou mensagem de commit
+
+---
+
+## Scripts disponíveis
+
+| Script | Comando | Descrição |
+|---|---|---|
+| `setup` | `npm run setup` | Gera `fixtures/.auth/user.json` via SSO |
+| `test:readonly` | `npm run test:readonly` | Executa todos os testes `@readonly` |
+| `test` | `npm test` | Executa toda a suíte |
+| `codegen` | `npm run codegen` | Abre codegen sem autenticação |
+| `codegen:auth` | `npm run codegen:auth` | Abre codegen com storageState carregado |
+| `report` | `npm run report` | Abre o relatório HTML em `evidencias/html` |
+
+---
+
+## Próximos passos recomendados
+
+1. Busca por nome de tabela (campo "Buscar tabelas...")
+2. Paginação readonly (Próx / Ant, tamanho de página)
+3. Empty state (filtro sem resultado)
+4. Abrir tabela em modo readonly (visualizar colunas e dados)
+5. Somente após os itens acima: fluxos destrutivos com `ENABLE_DESTRUCTIVE=true`
