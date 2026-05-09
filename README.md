@@ -79,7 +79,7 @@ npx playwright codegen \
 
 ## Cobertura atual
 
-**9 testes `@readonly` estáveis**, todos passando em execuções repetidas (27/27 na última validação).
+**10 testes `@readonly` estáveis**, todos passando em execuções repetidas (30/30 na última validação, sem flake).
 
 | Spec | Cenário |
 |---|---|
@@ -91,6 +91,7 @@ npx playwright codegen \
 | `visualizacao.spec.js` | Abertura da primeira tabela, validação de grid ou empty state, retorno à lista |
 | `empty-state.spec.js` | Busca sem resultado, validação de "Nenhuma tabela encontrada" e recuperação da lista ao limpar busca |
 | `tamanho-pagina.spec.js` | Altera quantidade de itens por página para 25, valida mudança na paginação e restaura para 10 itens |
+| `ordenacao.spec.js` | Clique no cabeçalho "Nome da Tabela", valida reordenação da lista; skip documentado quando mudança não for observável (aguardando `aria-sort` do front-end) |
 
 Setup: autenticação via Azure/Inbot SSO com cache guard — `fixtures/.auth/user.json` reutilizado enquanto válido.
 
@@ -139,7 +140,8 @@ Os testes existentes são **exclusivamente readonly**. Os fluxos abaixo ainda n�
 
 ---
 
-## Próximos passos recomendados
+## Próxima fase
 
-1. Ordenação de colunas readonly (clicar no cabeçalho, validar inversão da ordem)
-2. Somente após cobrir os itens acima: fluxos com escrita usando `ENABLE_DESTRUCTIVE=true`
+1. **Revisão de locators frágeis** — substituir `nth(1)` do card de empresa e combobox sem label por seletores estáveis, após solicitação ao time de front-end (`data-testid`, `aria-label`, `aria-sort`).
+2. **Exportação readonly** — validar CSV/XLSX se considerado seguro (sem efeitos colaterais no servidor).
+3. **Fluxos destrutivos controlados** — criar massa sintética, definir rollback, separar specs com tag `@destructive` e proteger por `ENABLE_DESTRUCTIVE=true`. Nunca rodar por padrão.
