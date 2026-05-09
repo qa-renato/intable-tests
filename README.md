@@ -79,7 +79,7 @@ npx playwright codegen \
 
 ## Cobertura atual
 
-**8 testes `@readonly` estáveis**, todos passando em execuções repetidas (24/24 na última validação).
+**9 testes `@readonly` estáveis**, todos passando em execuções repetidas (27/27 na última validação).
 
 | Spec | Cenário |
 |---|---|
@@ -90,6 +90,7 @@ npx playwright codegen \
 | `paginacao.spec.js` | Navegação para próxima página e retorno (skip automático se uma página só) |
 | `visualizacao.spec.js` | Abertura da primeira tabela, validação de grid ou empty state, retorno à lista |
 | `empty-state.spec.js` | Busca sem resultado, validação de "Nenhuma tabela encontrada" e recuperação da lista ao limpar busca |
+| `tamanho-pagina.spec.js` | Altera quantidade de itens por página para 25, valida mudança na paginação e restaura para 10 itens |
 
 Setup: autenticação via Azure/Inbot SSO com cache guard — `fixtures/.auth/user.json` reutilizado enquanto válido.
 
@@ -140,6 +141,5 @@ Os testes existentes são **exclusivamente readonly**. Os fluxos abaixo ainda n�
 
 ## Próximos passos recomendados
 
-1. Tamanho de página readonly (combobox "10 itens" → alterar e validar que a lista recarrega)
-2. Ordenação de colunas readonly (clicar no cabeçalho, validar inversão da ordem)
-3. Somente após cobrir os itens acima: fluxos com escrita usando `ENABLE_DESTRUCTIVE=true`
+1. Ordenação de colunas readonly (clicar no cabeçalho, validar inversão da ordem)
+2. Somente após cobrir os itens acima: fluxos com escrita usando `ENABLE_DESTRUCTIVE=true`
