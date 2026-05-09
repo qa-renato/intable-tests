@@ -143,6 +143,22 @@ class TabelasPage {
   async voltarPaginaAnterior() {
     await this.btnAnterior.click()
   }
+
+  /**
+   * Clica no primeiro botão "Abrir" e aguarda a tela de detalhe carregar.
+   */
+  async abrirPrimeiraTabela() {
+    await this.primeiroAbrirButton.click()
+    await this.page.waitForLoadState('networkidle')
+  }
+
+  /**
+   * Volta para a lista de tabelas via histórico do browser.
+   */
+  async voltarParaLista() {
+    await this.page.goBack()
+    await this.waitForTabelasLoaded()
+  }
 }
 
 module.exports = { TabelasPage }
