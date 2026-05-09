@@ -86,7 +86,7 @@ npx playwright codegen \
 
 | Spec | Cenário |
 |---|---|
-| `smoke.spec.js` | Carregamento de `/tables`: cabeçalhos, botão atualizar, paginação, botão Abrir |
+| `smoke.spec.js` | Carregamento de `/tables`: cabeçalhos (incl. `Criada em` e `Alterada em`), botão atualizar, paginação, botão Abrir |
 | `smoke.spec.js` | Expansão do painel de filtros e visibilidade dos controles |
 | `filtros.spec.js` | Filtro por departamento `testes` e validação de resultado |
 | `busca.spec.js` | Busca por nome de tabela e limpeza do campo |
