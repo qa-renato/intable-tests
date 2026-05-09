@@ -51,6 +51,10 @@ class TabelasPage {
     // Primeiro botão "Abrir" — usado apenas para checar existência de tabelas
     this.primeiroAbrirButton = page.getByRole('button', { name: 'Abrir' }).first()
 
+    // Empty state da lista — célula colspan exibida quando a busca não retorna resultados
+    // Texto confirmado via error-context em 2026-05-09: "Nenhuma tabela encontrada"
+    this.emptyStateLista = page.getByRole('cell', { name: 'Nenhuma tabela encontrada' })
+
     // Paginação
     this.paginacaoInfo = page.getByText(/Mostrando \d+-\d+ de \d+ itens/)
     this.btnProximo    = page.getByRole('button', { name: 'Prox' })
@@ -158,6 +162,22 @@ class TabelasPage {
   async voltarParaLista() {
     await this.page.goBack()
     await this.waitForTabelasLoaded()
+  }
+
+  /**
+   * Preenche o campo "Buscar tabelas..." e aguarda o resultado estabilizar.
+   */
+  async buscarTabela(termo) {
+    await this.buscarTabelasInput.fill(termo)
+    await this.page.waitForLoadState('networkidle')
+  }
+
+  /**
+   * Limpa o campo "Buscar tabelas..." e aguarda a lista ser restaurada.
+   */
+  async limparBuscaTabela() {
+    await this.buscarTabelasInput.fill('')
+    await this.page.waitForLoadState('networkidle')
   }
 }
 
