@@ -187,6 +187,29 @@ class TabelasPage {
   }
 
   /**
+   * Retorna o nome da primeira tabela visível na lista (primeira célula da primeira
+   * linha de dados). Retorna '' durante skeleton loading (células sem conteúdo).
+   * Pré-condição: primeiroAbrirButton já foi confirmado visível antes de chamar.
+   */
+  async getNomePrimeiraLinha() {
+    const texto = await this.page
+      .getByRole('row').nth(1)
+      .getByRole('cell').first()
+      .textContent()
+      .catch(() => '')
+    return (texto ?? '').trim()
+  }
+
+  /**
+   * Clica no cabeçalho "Nome da Tabela" para acionar ordenação.
+   * TODO: solicitar ao time de front-end aria-sort no columnheader para
+   * permitir validação de estado de ordenação via ARIA (asc/desc).
+   */
+  async ordenarPorNomeTabela() {
+    await this.colNomeTabela.click()
+  }
+
+  /**
    * Abre o combobox de tamanho de página e seleciona a opção indicada.
    * Retorna false (sem click) se a opção não aparecer — permite test.skip no caller.
    * @param {string} label  Texto exato da opção, ex: "25 itens"
