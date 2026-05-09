@@ -42,7 +42,10 @@ read -s USER_PASSWORD && export USER_PASSWORD
 ## Gerar sessão autenticada
 
 Executa o setup e salva o `storageState` em `fixtures/.auth/user.json`.
-Na próxima execução, o cache é reutilizado automaticamente enquanto os cookies forem válidos.
+
+Na próxima execução, o setup **valida a sessão no servidor** antes de reutilizar o cache: injeta os cookies no contexto, navega para `/` e verifica se o app permanece em `intable.inbot.com.br`. Se redirecionar para o Keycloak, limpa os cookies e refaz o login automaticamente. Sessões expiradas nunca são reutilizadas silenciosamente.
+
+Se a sessão estiver expirada e as variáveis `USER_EMAIL`/`USER_PASSWORD` não estiverem disponíveis, o setup falhará com mensagem explicando como exportá-las.
 
 ```bash
 BASE_URL=https://intable.inbot.com.br \
@@ -51,7 +54,7 @@ USER_PASSWORD="$USER_PASSWORD" \
 npx playwright test --project=setup --reporter=line
 ```
 
-Para forçar novo login, delete `fixtures/.auth/user.json` antes de rodar o setup.
+Para forçar novo login sem aguardar a validação, delete `fixtures/.auth/user.json` antes de rodar o setup.
 
 ---
 

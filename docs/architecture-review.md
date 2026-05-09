@@ -25,7 +25,7 @@
 ```
 intable/
 ├── fixtures/
-│   ├── global.setup.js          # Auth Azure/Inbot SSO + cache guard (cookies > 0 → reutiliza)
+│   ├── global.setup.js          # Auth Azure/Inbot SSO + cache guard (valida sessão no servidor → reutiliza ou refaz login)
 │   └── .auth/                   # gitignored — storageState gerado em runtime
 ├── pages/
 │   └── intable/
@@ -75,9 +75,9 @@ intable/
 
 ### 4.2 Autenticação
 
-- O storageState expira silenciosamente. O `cache guard` verifica apenas `cookies.length > 0`, não validade real dos cookies.
-- Se a sessão expirar no meio da suíte, os testes seguintes falharão com redirects inesperados — não com mensagem de expiração.
-- **Mitigação atual:** re-rodar o setup. **Mitigação futura:** validar um endpoint autenticado no `global.setup.js` antes de pular o login.
+- ~~O storageState expira silenciosamente~~ — **mitigado em `8a8b393`**: o setup agora injeta os cookies no contexto, navega para `/` e verifica a URL resultante. Se o app redirecionar para `kc.inbot.com.br`, os cookies são descartados e o login é refeito automaticamente.
+- **Risco residual:** a validação adiciona ~8s ao setup quando a sessão está válida (custo da navegação real). Aceitável dado que o setup roda uma vez por sessão de CI.
+- Se a sessão expirar e as credenciais (`USER_EMAIL`/`USER_PASSWORD`) não estiverem disponíveis, o setup falhará com mensagem clara — não silenciosamente.
 
 ### 4.3 Flakiness de rede
 
