@@ -122,6 +122,27 @@ class TabelasPage {
     await this.buscarButton.click()
     await this.page.waitForLoadState('networkidle')
   }
+
+  /**
+   * Retorna o texto atual do rodapé de paginação, ex: "Mostrando 1-10 de 25 itens".
+   */
+  async getTextoPaginacao() {
+    return (await this.paginacaoInfo.textContent())?.trim()
+  }
+
+  /**
+   * Clica em "Prox" para avançar de página.
+   */
+  async irParaProximaPagina() {
+    await this.btnProximo.click()
+  }
+
+  /**
+   * Clica em "Ant" para voltar de página.
+   */
+  async voltarPaginaAnterior() {
+    await this.btnAnterior.click()
+  }
 }
 
 module.exports = { TabelasPage }
