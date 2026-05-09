@@ -52,15 +52,23 @@ setup('autenticação global via Azure/Inbot SSO → intable.inbot.com.br', asyn
 
   fs.mkdirSync(AUTH_DIR, { recursive: true })
 
-  /* Reutiliza storageState existente se tiver cookies válidos.
+  /* Reutiliza storageState existente somente se o servidor ainda aceita os cookies.
+     Carrega os cookies no contexto, navega para / e verifica a URL resultante.
+     Se redirecionar para kc.inbot.com.br, a sessão expirou — prossegue com login.
      Força novo login: delete fixtures/.auth/user.json antes de rodar. */
   const authFile = path.join(AUTH_DIR, 'user.json')
   if (fs.existsSync(authFile)) {
     try {
       const cached = JSON.parse(fs.readFileSync(authFile, 'utf8'))
       if (cached.cookies && cached.cookies.length > 0) {
-        console.log(`✓ Auth reutilizada (${cached.cookies.length} cookies em cache)`)
-        return
+        await page.context().addCookies(cached.cookies)
+        await page.goto('/', { waitUntil: 'networkidle' })
+        if (page.url().includes('intable.inbot.com.br')) {
+          console.log(`✓ Auth reutilizada (${cached.cookies.length} cookies em cache)`)
+          return
+        }
+        await page.context().clearCookies()
+        console.log('⚠ Cookies em cache expirados — executando novo login')
       }
     } catch (_) { /* arquivo corrompido — continua para login */ }
   }
