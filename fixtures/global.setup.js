@@ -52,9 +52,10 @@ setup('autenticação global via Azure/Inbot SSO → intable.inbot.com.br', asyn
 
   fs.mkdirSync(AUTH_DIR, { recursive: true })
 
-  /* Reutiliza storageState existente somente se o servidor ainda aceita os cookies.
-     Carrega os cookies no contexto, navega para / e verifica a URL resultante.
-     Se redirecionar para kc.inbot.com.br, a sessão expirou — prossegue com login.
+  /* Reutiliza storageState existente somente se a Home autenticada carregar.
+     Verificar URL não é suficiente: o app exibe "Conecte Novamente" em intable.inbot.com.br
+     quando a sessão do app expira, mesmo com cookies de Keycloak presentes.
+     Critério correto: o campo "Buscar empresa..." da Home só existe em sessão válida.
      Força novo login: delete fixtures/.auth/user.json antes de rodar. */
   const authFile = path.join(AUTH_DIR, 'user.json')
   if (fs.existsSync(authFile)) {
@@ -63,12 +64,14 @@ setup('autenticação global via Azure/Inbot SSO → intable.inbot.com.br', asyn
       if (cached.cookies && cached.cookies.length > 0) {
         await page.context().addCookies(cached.cookies)
         await page.goto('/', { waitUntil: 'networkidle' })
-        if (page.url().includes('intable.inbot.com.br')) {
+        const homeAutenticada = page.getByRole('textbox', { name: 'Buscar empresa...' })
+        const sessaoValida = await homeAutenticada.isVisible({ timeout: 5_000 }).catch(() => false)
+        if (sessaoValida) {
           console.log(`✓ Auth reutilizada (${cached.cookies.length} cookies em cache)`)
           return
         }
         await page.context().clearCookies()
-        console.log('⚠ Cookies em cache expirados — executando novo login')
+        console.log('⚠ Sessão do app expirada (Home autenticada não carregou) — executando novo login')
       }
     } catch (_) { /* arquivo corrompido — continua para login */ }
   }
