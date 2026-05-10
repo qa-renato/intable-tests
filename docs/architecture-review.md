@@ -75,8 +75,10 @@ intable/
 
 ### 4.2 Autenticação
 
-- ~~O storageState expira silenciosamente~~ — **mitigado em `8a8b393`**: o setup agora injeta os cookies no contexto, navega para `/` e verifica a URL resultante. Se o app redirecionar para `kc.inbot.com.br`, os cookies são descartados e o login é refeito automaticamente.
-- **Risco residual:** a validação adiciona ~8s ao setup quando a sessão está válida (custo da navegação real). Aceitável dado que o setup roda uma vez por sessão de CI.
+- ~~O storageState expira silenciosamente~~ — **mitigado em `1ea83de`**: o setup injeta os cookies no contexto, navega para `/` e verifica se o campo `Buscar empresa...` está visível na Home. Esse campo só existe em sessão válida do aplicativo.
+- **Por que não basta verificar a URL:** o app exibe "Conecte Novamente" em `intable.inbot.com.br` quando a sessão do aplicativo expira, mesmo que os cookies do Keycloak ainda estejam presentes. Verificação por URL retornaria falso-positivo. A verificação pelo elemento confirma que o aplicativo reconhece a sessão.
+- **Se a validação falhar:** cookies são descartados e o login é refeito via SSO automaticamente.
+- **Risco residual:** a validação adiciona ~5–8s ao setup quando a sessão está válida (custo da navegação real). Aceitável dado que o setup roda uma vez por sessão de CI.
 - Se a sessão expirar e as credenciais (`USER_EMAIL`/`USER_PASSWORD`) não estiverem disponíveis, o setup falhará com mensagem clara — não silenciosamente.
 
 ### 4.3 Flakiness de rede

@@ -43,7 +43,16 @@ read -s USER_PASSWORD && export USER_PASSWORD
 
 Executa o setup e salva o `storageState` em `fixtures/.auth/user.json`.
 
-Na próxima execução, o setup **valida a sessão no servidor** antes de reutilizar o cache: injeta os cookies no contexto, navega para `/` e verifica se o app permanece em `intable.inbot.com.br`. Se redirecionar para o Keycloak, limpa os cookies e refaz o login automaticamente. Sessões expiradas nunca são reutilizadas silenciosamente.
+Na próxima execução, o setup **valida a sessão no servidor** antes de reutilizar o cache:
+
+1. Injeta os cookies salvos no contexto do browser.
+2. Navega para `/` com `waitUntil: 'networkidle'`.
+3. Verifica se o campo `Buscar empresa...` está visível — esse campo só existe na Home autenticada.
+4. Se estiver visível: reutiliza a sessão (retorna imediatamente).
+5. Se não estiver visível: limpa os cookies e refaz o login completo via SSO.
+
+> **Por que não basta verificar a URL?**
+> O app exibe uma página "Conecte Novamente" em `intable.inbot.com.br` quando a sessão do aplicativo expira, mesmo que os cookies do Keycloak ainda estejam presentes. Verificar a URL retornaria falso-positivo nesse cenário. A verificação pelo campo `Buscar empresa...` confirma que o app em si reconhece a sessão como válida.
 
 Se a sessão estiver expirada e as variáveis `USER_EMAIL`/`USER_PASSWORD` não estiverem disponíveis, o setup falhará com mensagem explicando como exportá-las.
 
