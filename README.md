@@ -111,14 +111,18 @@ Setup: autenticação via Azure/Inbot SSO com cache guard — `fixtures/.auth/us
 
 ## Fora do escopo atual
 
-Os testes existentes são **exclusivamente readonly**, com exceção da suíte de exportação (base criada, aguardando ajuste de front-end). Os fluxos abaixo ainda não têm cobertura:
+Os testes existentes são **exclusivamente readonly**, com exceção das suítes controladas abaixo (bases criadas, aguardando ajustes de front-end). Os fluxos abaixo ainda não têm cobertura:
 
 - Criação de tabela
 - Criação de coluna
 - Adição de linha
 - Exclusão
 - Importação
-- Qualquer fluxo destrutivo
+- Qualquer fluxo destrutivo não controlado
+
+**Suítes controladas criadas (bloqueadas por front-end):**
+- `@export` — base criada em `tests/export/`, bloqueada por `data-testid="table-actions-menu-button"` (Card 8)
+- `@api-key` — base criada em `tests/api-keys/`, bloqueada por `data-testid="api-keys-menu-button"` (Card 9)
 
 ---
 
@@ -146,6 +150,8 @@ Os testes existentes são **exclusivamente readonly**, com exceção da suíte d
 | `test:readonly` | `npm run test:readonly` | Executa todos os testes `@readonly` |
 | `test:export` | `npm run test:export` | Executa suíte `@export` (requer `ENABLE_EXPORT_TESTS=true`) |
 | `evidence:export` | `npm run evidence:export` | Coleta evidências da exportação (requer `ENABLE_EXPORT_TESTS=true`) |
+| `test:api-keys` | `npm run test:api-keys` | Executa suíte `@api-key` (requer `ENABLE_API_KEY_TESTS=true`) |
+| `evidence:api-keys` | `npm run evidence:api-keys` | Coleta evidências de API Keys (requer `ENABLE_API_KEY_TESTS=true`) |
 | `test` | `npm test` | Executa toda a suíte |
 | `codegen` | `npm run codegen` | Abre codegen sem autenticação |
 | `codegen:auth` | `npm run codegen:auth` | Abre codegen com storageState carregado |

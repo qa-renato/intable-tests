@@ -414,18 +414,99 @@ Ele **não aparece em nenhum código executável** da suíte.
 
 ---
 
+## Card 9 — Botão que abre o menu de API Keys (bloqueador de @api-key)
+
+**Título:**
+`[InTable][Testability] Adicionar seletor estável no botão que abre o menu de API Keys`
+
+**Prioridade:** Alta
+
+**Contexto:**
+A suíte `@api-key` já foi criada em `tests/api-keys/api-key-management.spec.js`, mas a execução real está bloqueada porque o botão que abre o menu de API Keys (onde está o item "Gerenciar Chaves de API") não possui seletor estável no DOM.
+
+**Problema observado:**
+O Playwright Codegen gerou seletor posicional para este botão. Esse seletor é frágil, depende da ordem dos elementos na tela e não deve ser usado em teste automatizado. Qualquer mudança de layout o quebra silenciosamente.
+
+O teste usa `getByTestId('api-keys-menu-button')` e falha com mensagem clara enquanto o atributo não existir:
+
+```
+BLOQUEIO: botão que abre o menu de API Keys não encontrado.
+Adicionar data-testid="api-keys-menu-button" ao botão de acesso ao menu.
+Consulte docs/frontend-testability-tickets.md — Card 9.
+```
+
+**Impacto:**
+Sem esse ajuste, o teste não consegue abrir o menu onde aparece "Gerenciar Chaves de API".
+Isso bloqueia o fluxo completo:
+
+```
+Selecionar empresa → abrir menu de API Keys → Gerenciar Chaves de API →
+Nova API Key → Gerar Chave → Voltar para listagem → Revogar
+```
+
+**Pedido ao front-end:**
+Adicionar ao botão que abre o menu de API Keys:
+
+```html
+<button
+  data-testid="api-keys-menu-button"
+  aria-label="Ações de API Keys"
+>
+  <!-- ícone existente — sem alteração visual -->
+</button>
+```
+
+Qualquer uma das duas é suficiente para desbloquear:
+- `data-testid="api-keys-menu-button"` ← preferida
+- `aria-label="Ações de API Keys"` ou `aria-label="Menu de API Keys"`
+
+**Critério de aceite:**
+
+```js
+await page.getByTestId('api-keys-menu-button').click()
+// ou
+await page.getByRole('button', { name: 'Ações de API Keys' }).click()
+// após o clique: menuitem 'Gerenciar Chaves de API' deve estar visível
+await expect(page.getByRole('menuitem', { name: 'Gerenciar Chaves de API' })).toBeVisible()
+```
+
+**Seletores já avaliados via Codegen (a confirmar no DOM real):**
+
+| Seletor | Passo |
+|---|---|
+| `getByRole('menuitem', { name: 'Gerenciar Chaves de API' })` | Item do menu de API Keys |
+| `getByRole('button', { name: 'Nova API Key' })` | Iniciar criação de chave |
+| `getByRole('button', { name: 'Gerar Chave' })` | Confirmar geração |
+| `getByRole('button', { name: 'Copiar para área de transferência' })` | Validar criação |
+| `getByRole('button', { name: 'Voltar para listagem' })` | Retornar à lista |
+| `getByRole('button', { name: 'Revogar acesso desta chave' })` | Revogar chave |
+| `getByRole('button', { name: 'Sim, Excluir' })` | Confirmar revogação |
+
+**Seletores adicionais desejados (formulário de criação):**
+
+| data-testid | Elemento |
+|---|---|
+| `api-key-department-select` | Dropdown de departamento |
+| `api-key-department-option-testes` | Opção "testes" no dropdown |
+
+**Observação:**
+O seletor posicional gerado pelo Codegen para este botão pode aparecer em documentação como exemplo do que **não** usar. Ele **não aparece em nenhum código executável** da suíte.
+
+---
+
 ## Resumo de prioridade
 
-| Prioridade  | Card                                            |
-| ----------- | ----------------------------------------------- |
-| Alta        | Dropdown de empresas                            |
-| Alta        | Dropdown de departamentos                       |
-| Alta        | Card da empresa na Home                         |
-| Alta        | Botão menu de ações da tabela (bloqueador @export) |
-| Média       | Combobox de itens por página                    |
-| Média       | Cabeçalhos com aria-sort                        |
-| Média       | Botões de ação com aria-label                   |
-| Média/Baixa | Datepicker acessível                            |
+| Prioridade  | Card                                                      |
+| ----------- | --------------------------------------------------------- |
+| Alta        | Dropdown de empresas                                      |
+| Alta        | Dropdown de departamentos                                 |
+| Alta        | Card da empresa na Home                                   |
+| Alta        | Botão menu de ações da tabela (bloqueador @export)        |
+| Alta        | Botão menu de API Keys (bloqueador @api-key)              |
+| Média       | Combobox de itens por página                              |
+| Média       | Cabeçalhos com aria-sort                                  |
+| Média       | Botões de ação com aria-label                             |
+| Média/Baixa | Datepicker acessível                                      |
 
 ---
 
