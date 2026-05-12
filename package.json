@@ -5,10 +5,16 @@
   "scripts": {
     "setup": "npx playwright test --project=setup --reporter=line",
     "test:readonly": "BASE_URL=https://intable.inbot.com.br ENABLE_DESTRUCTIVE=false npx playwright test tests/tabelas --grep \"@readonly\" --reporter=line",
+    "test:export": "node scripts/run-export.js",
     "test": "npx playwright test --reporter=line",
     "evidence:readonly": "bash scripts/evidence-readonly.sh",
+    "evidence:export": "bash scripts/evidence-export.sh",
     "codegen": "npx playwright codegen https://intable.inbot.com.br/",
     "codegen:auth": "npx playwright codegen --load-storage=fixtures/.auth/user.json https://intable.inbot.com.br/",
     "report": "npx playwright show-report"
+  },
+  "devDependencies": {
+    "@azure/identity": "^4.13.1",
+    "@microsoft/microsoft-graph-client": "^3.0.7"
   }
 }

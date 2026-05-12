@@ -111,14 +111,13 @@ Setup: autenticação via Azure/Inbot SSO com cache guard — `fixtures/.auth/us
 
 ## Fora do escopo atual
 
-Os testes existentes são **exclusivamente readonly**. Os fluxos abaixo ainda não têm cobertura:
+Os testes existentes são **exclusivamente readonly**, com exceção da suíte de exportação (base criada, aguardando ajuste de front-end). Os fluxos abaixo ainda não têm cobertura:
 
 - Criação de tabela
 - Criação de coluna
 - Adição de linha
 - Exclusão
 - Importação
-- Exportação
 - Qualquer fluxo destrutivo
 
 ---
@@ -145,6 +144,8 @@ Os testes existentes são **exclusivamente readonly**. Os fluxos abaixo ainda n�
 |---|---|---|
 | `setup` | `npm run setup` | Gera `fixtures/.auth/user.json` via SSO |
 | `test:readonly` | `npm run test:readonly` | Executa todos os testes `@readonly` |
+| `test:export` | `npm run test:export` | Executa suíte `@export` (requer `ENABLE_EXPORT_TESTS=true`) |
+| `evidence:export` | `npm run evidence:export` | Coleta evidências da exportação (requer `ENABLE_EXPORT_TESTS=true`) |
 | `test` | `npm test` | Executa toda a suíte |
 | `codegen` | `npm run codegen` | Abre codegen sem autenticação |
 | `codegen:auth` | `npm run codegen:auth` | Abre codegen com storageState carregado |
@@ -155,5 +156,5 @@ Os testes existentes são **exclusivamente readonly**. Os fluxos abaixo ainda n�
 ## Próxima fase
 
 1. **Revisão de locators frágeis** — substituir `nth(1)` do card de empresa e combobox sem label por seletores estáveis, após solicitação ao time de front-end (`data-testid`, `aria-label`, `aria-sort`).
-2. **Exportação readonly** — validar CSV/XLSX se considerado seguro (sem efeitos colaterais no servidor).
+2. **Desbloqueio da suíte @export** — base técnica criada em `tests/export/`. Bloqueada pelo botão do menu de ações da tabela sem seletor estável. Desbloqueada assim que o front-end adicionar `data-testid="table-actions-menu-button"` (ver Card 8 em `docs/frontend-testability-tickets.md`).
 3. **Fluxos destrutivos controlados** — criar massa sintética, definir rollback, separar specs com tag `@destructive` e proteger por `ENABLE_DESTRUCTIVE=true`. Nunca rodar por padrão.

@@ -336,17 +336,76 @@ Permite criar testes de filtro por data sem depender de números ambíguos.
 
 ---
 
+## Card 8 — Botão que abre o menu de ações da tabela (bloqueador de exportação)
+
+**Título:**
+`[InTable][Testability] Adicionar data-testid no botão que abre o menu de ações/exportação da tabela`
+
+**Prioridade:** Alta
+
+**Contexto:**
+A suíte de exportação automatizada (`@export`) está bloqueada neste passo. O botão que abre o menu de ações (onde está a opção "Exportar (CSV)") não tem seletor estável no DOM.
+
+**Problema observado:**
+O Playwright Codegen gerou o seletor:
+
+```js
+page.getByRole('button').filter({ hasText: /^$/ }).nth(4)
+```
+
+Esse seletor é posicional — quebra com qualquer mudança de layout (novo botão, reordenação, responsive). **Esse seletor não é usado na suíte.**
+
+O teste atual usa `getByTestId('table-actions-menu-button')` e falha com mensagem clara enquanto o atributo não existir:
+
+```
+BLOQUEIO: botão do menu de ações não encontrado.
+Adicionar data-testid="table-actions-menu-button" (ou aria-label="Ações da tabela")
+ao botão que abre o menu de ações/exportação da tabela.
+```
+
+**Pedido ao front-end:**
+Adicionar ao botão que abre o menu de ações da tabela (na tela de detalhe da tabela):
+
+```html
+<button
+  data-testid="table-actions-menu-button"
+  aria-label="Ações da tabela"
+>
+  <!-- ícone existente — sem alteração visual -->
+</button>
+```
+
+Qualquer uma das duas é suficiente para desbloquear:
+- `data-testid="table-actions-menu-button"` ← preferida
+- `aria-label="Ações da tabela"` ou `aria-label="Abrir menu de ações"`
+
+**Critério de aceite:**
+
+```js
+await page.getByTestId('table-actions-menu-button').click()
+// ou
+await page.getByRole('button', { name: 'Ações da tabela' }).click()
+// após o clique: menuitem 'Exportar (CSV)' deve estar visível
+await expect(page.getByRole('menuitem', { name: 'Exportar (CSV)' })).toBeVisible()
+```
+
+**Benefício:**
+Desbloqueia a execução completa do fluxo de exportação automatizado: menu → Exportar (CSV) → Notificações → Baixar CSV → validação do arquivo. Os demais seletores do fluxo já estão confirmados via Codegen.
+
+---
+
 ## Resumo de prioridade
 
-| Prioridade  | Card                          |
-| ----------- | ----------------------------- |
-| Alta        | Dropdown de empresas          |
-| Alta        | Dropdown de departamentos     |
-| Alta        | Card da empresa na Home       |
-| Média       | Combobox de itens por página  |
-| Média       | Cabeçalhos com aria-sort      |
-| Média       | Botões de ação com aria-label |
-| Média/Baixa | Datepicker acessível          |
+| Prioridade  | Card                                            |
+| ----------- | ----------------------------------------------- |
+| Alta        | Dropdown de empresas                            |
+| Alta        | Dropdown de departamentos                       |
+| Alta        | Card da empresa na Home                         |
+| Alta        | Botão menu de ações da tabela (bloqueador @export) |
+| Média       | Combobox de itens por página                    |
+| Média       | Cabeçalhos com aria-sort                        |
+| Média       | Botões de ação com aria-label                   |
+| Média/Baixa | Datepicker acessível                            |
 
 ---
 
