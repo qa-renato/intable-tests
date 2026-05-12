@@ -20,6 +20,9 @@ const { TabelasPage } = require('../../pages/intable/tabelas.page')
  * Variáveis configuráveis (com defaults seguros):
  *   API_KEY_TEST_COMPANY     Empresa onde gerenciar chaves (default: "inbot")
  *   API_KEY_TEST_DEPARTMENT  Departamento para a chave    (default: "testes")
+ *   API_KEY_TEST_TABLE       Tabela de massa de teste      (default: "")
+ *                            Usada no nome da chave para rastreabilidade e,
+ *                            se o form exigir seleção de tabela, como critério.
  *
  * SEGURANÇA — trace, screenshot e video desabilitados:
  *   Qualquer um desses artefatos pode capturar o valor da chave exibido na UI.
@@ -52,10 +55,14 @@ const { TabelasPage } = require('../../pages/intable/tabelas.page')
 const ENABLE_API_KEY_TESTS = process.env.ENABLE_API_KEY_TESTS === 'true'
 const TEST_COMPANY = process.env.API_KEY_TEST_COMPANY || 'inbot'
 const TEST_DEPARTMENT = process.env.API_KEY_TEST_DEPARTMENT || 'testes'
+const TEST_TABLE = process.env.API_KEY_TEST_TABLE || ''
+
+// Desabilita artefatos no nível do arquivo — trace/screenshot/video não podem
+// ser desabilitados dentro de test.describe (forçam novo worker nesta versão do Playwright).
+// Qualquer um desses artefatos poderia capturar o valor da chave exibido na UI.
+test.use({ trace: 'off', screenshot: 'off', video: 'off' })
 
 test.describe('InTable — Gerenciamento de API Keys @api-key @integration @destructive', () => {
-  // Desabilita artefatos que podem capturar o valor da chave exibido na UI.
-  test.use({ trace: 'off', screenshot: 'off', video: 'off' })
 
   test(
     'deve gerar, listar e revogar API Key com permissões mínimas @api-key @integration @destructive',
@@ -65,8 +72,10 @@ test.describe('InTable — Gerenciamento de API Keys @api-key @integration @dest
         'Passe ENABLE_API_KEY_TESTS=true para habilitar esta suíte de API Keys'
       )
 
-      // Nome único: garante rastreabilidade e cleanup seguro sem usar o valor da chave.
-      const keyName = `qa-api-key-${Date.now()}`
+      // Nome único: inclui tabela de referência (se informada) para rastreabilidade.
+      // Nunca contém o valor da chave — é apenas um identificador de cleanup.
+      const tableSlug = TEST_TABLE ? `-${TEST_TABLE.toLowerCase().replace(/\s+/g, '-')}` : ''
+      const keyName = `qa-api-key${tableSlug}-${Date.now()}`
       let keyCreated = false
       let keyRevoked = false
       let apiKeysPageUrl = ''
@@ -176,6 +185,7 @@ test.describe('InTable — Gerenciamento de API Keys @api-key @integration @dest
           description:
             `API Key criada | Nome: ${keyName} | ` +
             `Empresa: ${TEST_COMPANY} | Departamento: ${TEST_DEPARTMENT} | ` +
+            (TEST_TABLE ? `Tabela: ${TEST_TABLE} | ` : '') +
             `Timestamp: ${new Date().toISOString()}`,
         })
 

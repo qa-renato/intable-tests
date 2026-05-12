@@ -25,10 +25,12 @@ const { execSync } = require('child_process')
 
 const company = process.env.API_KEY_TEST_COMPANY || 'inbot'
 const department = process.env.API_KEY_TEST_DEPARTMENT || 'testes'
+const table = process.env.API_KEY_TEST_TABLE || ''
 
 console.log('\n[run-api-keys] Iniciando suíte @api-key...')
 console.log(`[run-api-keys] Empresa     : ${company}`)
 console.log(`[run-api-keys] Departamento: ${department}`)
+if (table) console.log(`[run-api-keys] Tabela      : ${table}`)
 console.log('[run-api-keys] AVISO: trace, screenshot e video desabilitados nesta suíte.')
 console.log('[run-api-keys] Toda chave criada será revogada ao final do teste.\n')
 
@@ -39,5 +41,6 @@ execSync('npx playwright test tests/api-keys --grep "@api-key" --reporter=line',
     BASE_URL: process.env.BASE_URL || 'https://intable.inbot.com.br',
     API_KEY_TEST_COMPANY: company,
     API_KEY_TEST_DEPARTMENT: department,
+    ...(table ? { API_KEY_TEST_TABLE: table } : {}),
   },
 })
