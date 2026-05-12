@@ -2,11 +2,16 @@
 
 ## Status
 
-**Base técnica criada — execução real de ponta a ponta ainda não realizada.**
+**Base técnica criada — execução real bloqueada por seletor de front-end ausente.**
 
 A suíte `@api-key` foi estruturada com guard de flag, cleanup robusto via `finally`,
 regras de não exposição de chave e seletores estáveis onde disponíveis.
-O fluxo **não foi executado de ponta a ponta** por um bloqueador de front-end.
+
+Uma execução real foi realizada em **2026-05-11** com a massa autorizada
+(empresa `inbot`, departamento `testes`, tabela `TesteAut`).
+O setup validou a sessão com sucesso (24 cookies em cache).
+O teste falhou de forma controlada no passo do botão do menu de API Keys —
+**nenhuma chave foi criada, não há cleanup manual pendente.**
 
 ### Bloqueador atual
 
@@ -94,8 +99,14 @@ Por isso, a suíte é classificada como `@api-key @integration @destructive`:
 |---|---|---|
 | `API_KEY_TEST_COMPANY` | `inbot` | Empresa onde gerenciar chaves. |
 | `API_KEY_TEST_DEPARTMENT` | `testes` | Departamento associado à chave (se o form exigir). |
+| `API_KEY_TEST_TABLE` | _(vazio)_ | Tabela de massa de teste (ex: `TesteAut`). Incluída no nome da chave para rastreabilidade. Se o formulário exigir seleção de tabela, usada como critério. |
 
 Não há variáveis obrigatórias além da flag. Nenhuma chave real deve ser configurada aqui.
+
+**Massa sugerida para execução controlada:**
+- `API_KEY_TEST_COMPANY="inbot"`
+- `API_KEY_TEST_DEPARTMENT="testes"`
+- `API_KEY_TEST_TABLE="TesteAut"`
 
 Nunca commitar variáveis de ambiente. Salvar em `.env` (protegido pelo `.gitignore`).
 
@@ -116,6 +127,7 @@ npm run test:api-keys
 ENABLE_API_KEY_TESTS=true \
 API_KEY_TEST_COMPANY="inbot" \
 API_KEY_TEST_DEPARTMENT="testes" \
+API_KEY_TEST_TABLE="TesteAut" \
 npm run test:api-keys
 ```
 
@@ -125,6 +137,7 @@ npm run test:api-keys
 ENABLE_API_KEY_TESTS=true \
 API_KEY_TEST_COMPANY="inbot" \
 API_KEY_TEST_DEPARTMENT="testes" \
+API_KEY_TEST_TABLE="TesteAut" \
 npm run evidence:api-keys
 ```
 
@@ -142,8 +155,8 @@ npm run test:api-keys
 | Risco | Probabilidade | Mitigação |
 |---|---|---|
 | Chave não revogada em caso de falha | Média | Cleanup obrigatório no bloco `finally` com anotação de warning |
-| Trace captura valor da chave | Alta (se ativo) | `test.use({ trace: 'off' })` no describe da suíte |
-| Screenshot captura valor da chave | Alta (se ativo) | `test.use({ screenshot: 'off' })` no describe da suíte |
+| Trace captura valor da chave | Alta (se ativo) | `test.use({ trace: 'off' })` no nível do arquivo (acima do describe) |
+| Screenshot captura valor da chave | Alta (se ativo) | `test.use({ screenshot: 'off' })` no nível do arquivo (acima do describe) |
 | Seletor frágil na identificação da chave para revogação | Alta | Usa nome único por timestamp + `getByRole('row').filter({ hasText: keyName })` |
 | Campo de nome não existe no form | Baixa | Test anota e falha explicitamente antes de tentar revogar sem identificação |
 | Botão de menu sem seletor estável | Alta | Documentado como bloqueio — teste falha com mensagem clara |
@@ -153,7 +166,7 @@ npm run test:api-keys
 ## 8. Regra de cleanup
 
 - **Toda chave gerada pelo teste deve ser revogada.**
-- O nome da chave usa `qa-api-key-${Date.now()}` — único e rastreável.
+- O nome da chave usa `qa-api-key-<tabela>-${Date.now()}` (ex: `qa-api-key-testeaut-1747000000000`) — único, rastreável e vinculado à massa de teste.
 - O bloco `finally` tenta revogar a chave se `keyCreated && !keyRevoked`.
 - Se o cleanup automático falhar, o teste anota um `warning` no relatório:
 

@@ -2,7 +2,11 @@
 
 Automação E2E com Playwright para o InTable.
 Alvo: `https://intable.inbot.com.br`.
-Foco atual: smoke e validações readonly.
+
+Suítes existentes:
+- **@readonly** — 10 testes estáveis, execução padrão, sem side effects.
+- **@export** — base técnica criada, protegida por `ENABLE_EXPORT_TESTS=true`, bloqueada por seletor de front-end.
+- **@api-key** — base técnica criada, protegida por `ENABLE_API_KEY_TESTS=true`, bloqueada por seletor de front-end.
 
 ---
 
@@ -17,12 +21,19 @@ Foco atual: smoke e validações readonly.
 ## Estrutura do projeto
 
 ```
-fixtures/           # Setup global de autenticação e extensões de fixture
+fixtures/           # Setup global de autenticação (storageState)
 pages/              # Page objects (seletores e métodos por tela)
-tests/              # Specs organizados por funcionalidade
+tests/
+  tabelas/          # Suíte @readonly (10 specs)
+  export/           # Suíte @export — base técnica, requer flag
+  api-keys/         # Suíte @api-key — base técnica, requer flag
+helpers/            # Helpers reutilizáveis (emailClient, notifications)
+scripts/            # Wrappers de execução com flag guard
+docs/               # Documentação de suítes, tickets de testabilidade
 evidencias/         # Artefatos de teste — NÃO versionado (.gitignore)
 playwright.config.js
 package.json
+.env.example        # Template de variáveis de ambiente (sem valores reais)
 ```
 
 ---
@@ -136,9 +147,11 @@ Os testes existentes são **exclusivamente readonly**, com exceção das suítes
 ## Segurança
 
 - Nunca commitar `fixtures/.auth/user.json` (contém cookies de sessão)
-- Nunca commitar `.env`
+- Nunca commitar `.env` ou qualquer variante `.env.*` (exceto `.env.example`)
 - Nunca commitar `evidencias/`, traces, vídeos ou screenshots
-- Nunca hardcodar senha em código ou mensagem de commit
+- Nunca commitar `downloads/` (arquivos CSV/XLSX gerados nos testes)
+- Nunca hardcodar senha, token ou API Key em código ou mensagem de commit
+- Nunca imprimir API Key completa em log, relatório ou annotation
 
 ---
 
@@ -148,11 +161,12 @@ Os testes existentes são **exclusivamente readonly**, com exceção das suítes
 |---|---|---|
 | `setup` | `npm run setup` | Gera `fixtures/.auth/user.json` via SSO |
 | `test:readonly` | `npm run test:readonly` | Executa todos os testes `@readonly` |
+| `evidence:readonly` | `npm run evidence:readonly` | Coleta evidências da suíte `@readonly` |
 | `test:export` | `npm run test:export` | Executa suíte `@export` (requer `ENABLE_EXPORT_TESTS=true`) |
 | `evidence:export` | `npm run evidence:export` | Coleta evidências da exportação (requer `ENABLE_EXPORT_TESTS=true`) |
 | `test:api-keys` | `npm run test:api-keys` | Executa suíte `@api-key` (requer `ENABLE_API_KEY_TESTS=true`) |
 | `evidence:api-keys` | `npm run evidence:api-keys` | Coleta evidências de API Keys (requer `ENABLE_API_KEY_TESTS=true`) |
-| `test` | `npm test` | Executa toda a suíte |
+| `test` | `npm test` | Executa toda a suíte (inclui setup) |
 | `codegen` | `npm run codegen` | Abre codegen sem autenticação |
 | `codegen:auth` | `npm run codegen:auth` | Abre codegen com storageState carregado |
 | `report` | `npm run report` | Abre o relatório HTML em `evidencias/html` |
@@ -162,5 +176,6 @@ Os testes existentes são **exclusivamente readonly**, com exceção das suítes
 ## Próxima fase
 
 1. **Revisão de locators frágeis** — substituir `nth(1)` do card de empresa e combobox sem label por seletores estáveis, após solicitação ao time de front-end (`data-testid`, `aria-label`, `aria-sort`).
-2. **Desbloqueio da suíte @export** — base técnica criada em `tests/export/`. Bloqueada pelo botão do menu de ações da tabela sem seletor estável. Desbloqueada assim que o front-end adicionar `data-testid="table-actions-menu-button"` (ver Card 8 em `docs/frontend-testability-tickets.md`).
-3. **Fluxos destrutivos controlados** — criar massa sintética, definir rollback, separar specs com tag `@destructive` e proteger por `ENABLE_DESTRUCTIVE=true`. Nunca rodar por padrão.
+2. **Desbloqueio da suíte @export** — base criada em `tests/export/`. Bloqueada por `data-testid="table-actions-menu-button"` ausente no front-end (Card 8 em `docs/frontend-testability-tickets.md`).
+3. **Desbloqueio da suíte @api-key** — base criada em `tests/api-keys/`. Bloqueada por `data-testid="api-keys-menu-button"` ausente no front-end (Card 9 em `docs/frontend-testability-tickets.md`). Execução real validada até o ponto do bloqueio em 2026-05-11 — sessão ok, empresa selecionada, nenhuma chave criada.
+4. **Fluxos destrutivos controlados** — criar massa sintética, definir rollback, separar specs com tag `@destructive` e proteger por `ENABLE_DESTRUCTIVE=true`. Nunca rodar por padrão.
