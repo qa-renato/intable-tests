@@ -339,12 +339,12 @@ Permite criar testes de filtro por data sem depender de números ambíguos.
 ## Card 8 — Botão que abre o menu de ações da tabela (bloqueador de exportação)
 
 **Título:**
-`[InTable][Testability] Adicionar data-testid no botão que abre o menu de ações/exportação da tabela`
+`[InTable][Testability] Adicionar seletor estável no botão de ações/exportação da tabela`
 
 **Prioridade:** Alta
 
 **Contexto:**
-A suíte de exportação automatizada (`@export`) está bloqueada neste passo. O botão que abre o menu de ações (onde está a opção "Exportar (CSV)") não tem seletor estável no DOM.
+A suíte `@export` já foi criada em `tests/export/export-table.spec.js`, mas a execução real está bloqueada porque o botão que abre o menu de ações da tabela (onde está a opção "Exportar (CSV)") não possui seletor estável no DOM.
 
 **Problema observado:**
 O Playwright Codegen gerou o seletor:
@@ -353,14 +353,23 @@ O Playwright Codegen gerou o seletor:
 page.getByRole('button').filter({ hasText: /^$/ }).nth(4)
 ```
 
-Esse seletor é posicional — quebra com qualquer mudança de layout (novo botão, reordenação, responsive). **Esse seletor não é usado na suíte.**
+Esse seletor é posicional, depende da ordem dos elementos na tela e não deve ser usado em teste automatizado. Qualquer mudança de layout — novo botão, reordenação ou ajuste responsive — quebra o seletor silenciosamente.
 
-O teste atual usa `getByTestId('table-actions-menu-button')` e falha com mensagem clara enquanto o atributo não existir:
+O teste usa `getByTestId('table-actions-menu-button')` e falha com mensagem clara enquanto o atributo não existir:
 
 ```
 BLOQUEIO: botão do menu de ações não encontrado.
 Adicionar data-testid="table-actions-menu-button" (ou aria-label="Ações da tabela")
 ao botão que abre o menu de ações/exportação da tabela.
+```
+
+**Impacto:**
+Sem esse ajuste, o teste não consegue abrir o menu onde aparece a opção "Exportar (CSV)".
+Isso bloqueia o fluxo completo:
+
+```
+Abrir tabela → abrir menu de ações → Exportar (CSV) →
+Notificações → Baixar CSV → validar download .csv
 ```
 
 **Pedido ao front-end:**
@@ -389,8 +398,19 @@ await page.getByRole('button', { name: 'Ações da tabela' }).click()
 await expect(page.getByRole('menuitem', { name: 'Exportar (CSV)' })).toBeVisible()
 ```
 
-**Benefício:**
-Desbloqueia a execução completa do fluxo de exportação automatizado: menu → Exportar (CSV) → Notificações → Baixar CSV → validação do arquivo. Os demais seletores do fluxo já estão confirmados via Codegen.
+**Seletores já confirmados via Codegen (2026-05-11):**
+
+Os demais seletores do fluxo de exportação já foram observados e estão estáveis — não precisam de ajuste no front-end:
+
+| Seletor | Passo |
+|---|---|
+| `getByRole('menuitem', { name: 'Exportar (CSV)' })` | Item do menu de exportação |
+| `getByRole('button', { name: 'Notificações' })` | Botão de notificações no header |
+| `getByRole('button', { name: 'Baixar CSV' })` | Botão de download no painel |
+
+**Observação:**
+O seletor `nth(4)` pode aparecer em documentação como exemplo do que **não** usar.
+Ele **não aparece em nenhum código executável** da suíte.
 
 ---
 
