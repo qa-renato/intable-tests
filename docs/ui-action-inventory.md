@@ -23,7 +23,7 @@ _Gerado via inspeção DOM read-only em 2026-05-13. Nenhum dado foi criado, edit
 |---|---|---|---|---|
 | Toggle sidebar (abrir/fechar menu lateral) | navegação | N/A | `[PEND]` | Botão sem testId, sem aria-label |
 | Toggle theme (claro/escuro) | preferência | N/A | `[PEND]` | Botão sem testId, sem aria-label |
-| Abrir painel de notificações/downloads | leitura | @readonly | `[PEND]` | `getByRole('button', { name: 'Notificações' })` funciona mas sem testId |
+| Abrir painel de notificações/downloads | leitura | @readonly | `[COB]` | `getByRole('button', { name: 'Notificações' })` + heading "Downloads" como âncora |
 | Marcar todas notificações como lidas | escrita | @readonly | `[PEND]` | Botão "Marcar todas como lidas" sem testId |
 | Navegar para próxima página de notificações | navegação | @readonly | `[PEND]` | Botão "Prox" dentro do painel |
 
@@ -42,7 +42,7 @@ _Gerado via inspeção DOM read-only em 2026-05-13. Nenhum dado foi criado, edit
 | Ver cards de tabelas recentes da empresa | leitura | @readonly | `[PEND]` | H3 com nome da tabela visível; cards sem testId |
 | Ações sobre card de tabela (ícone-only) | escrita | N/A | `[BLOQ]` | ~12 botões `class="p-1 hover:bg-muted rounded"` sem aria-label, sem testId — completamente opacos |
 | Criar nova tabela via home | escrita | @table-create | `[BLOQ]` | Botão "Nova Base" sem testId; Card 10 (`create-table-button`) |
-| Ver todas as tabelas da empresa | navegação | @readonly | `[PEND]` | Botão "Ver todas" redireciona para /tables — sem testId |
+| Ver todas as tabelas da empresa | navegação | @readonly | `[COB]` | `getByRole('button', { name: 'Ver todas' })` → verifica buscarTabelasInput visível |
 
 ### Estatísticas visíveis na home
 
@@ -85,7 +85,7 @@ _Gerado via inspeção DOM read-only em 2026-05-13. Nenhum dado foi criado, edit
 |---|---|---|---|---|
 | Ver cabeçalhos da tabela | leitura | @readonly | `[COB]` | Todos 7 columnheaders validados |
 | Ordenar por "Nome da Tabela" | leitura | @readonly | `[FRAGIL]` | Click no columnheader funciona; `aria-sort` ausente — validação de resultado indeterminada |
-| Ordenar por outras colunas | leitura | @readonly | `[PEND]` | Mesma limitação de `aria-sort` |
+| Ordenar por outras colunas | leitura | @readonly | `[COB]` | Empresa, Departamento, Criada em, Alterada em — verifica grid intacto; direção aguarda aria-sort (Card 5) |
 | Abrir primeira tabela | navegação | @readonly | `[COB]` | `getByRole('button', { name: 'Abrir' }).first()` — requer timeout >= 10s |
 | Abrir tabela específica por linha | navegação | @readonly | `[PEND]` | `getByRole('row').filter({ hasText: nome }).getByRole('button', { name: 'Abrir' })` |
 | Estado vazio — busca sem resultado | leitura | @readonly | `[COB]` | `getByRole('cell', { name: 'Nenhuma tabela encontrada' })` |
@@ -170,9 +170,9 @@ _Fluxo previsto pela suíte `@table-create`. Não acessível sem os testids do C
 
 | Status | Quantidade | Observações |
 |---|---|---|
-| `[COB]` — coberto | 18 | Testes estáveis, passando |
+| `[COB]` — coberto | 22 | Testes estáveis, passando |
 | `[FRAGIL]` — coberto com locator frágil | 4 | Funciona; sujeito a quebra sem aviso |
-| `[PEND]` — não coberto (possível) | 20 | Ações identificadas, sem bloqueio de front-end |
+| `[PEND]` — não coberto (possível) | 16 | Ações identificadas, sem bloqueio de front-end |
 | `[BLOQ]` — bloqueado por front-end | 12 | Cards 8, 9 e 10 pendentes |
 
 ---

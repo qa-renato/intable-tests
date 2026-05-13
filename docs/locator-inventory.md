@@ -94,12 +94,24 @@ _Referência para avaliar fragilidade dos seletores existentes e priorizar pedid
 
 ## Área 3 — Painel de notificações/downloads
 
+> **Achado de diagnóstico (2026-05-13):**
+> O `role="region" aria-label="Notifications (F8)"` permanece **always hidden** — é um container
+> auxiliar de estado, não o painel visível. O painel real abre como popover dentro do banner,
+> adjacente ao botão "Notificações". O heading H3 "Downloads" é a âncora correta do painel.
+>
+> **Achado de acessibilidade:** pressionar `Escape` **não fecha** este popover. O fechamento
+> correto é via segundo clique no botão "Notificações" (toggle). Isso pode ser um bug de
+> acessibilidade — popovers acessíveis geralmente respondem a Escape (WAI-ARIA).
+
 | Elemento | Locator atual | Classe | Motivo | Sugestão |
 |---|---|---|---|---|
-| Região do painel | `getByRole('region', { name: 'Notifications (F8)' })` | Funcional | `aria-label` presente no DOM | Manter; adicionar testid para consistência |
+| Container auxiliar do painel | `getByRole('region', { name: 'Notifications (F8)' })` | **Ausente** | Sempre hidden — NÃO é o painel visível | Não usar para verificar estado do painel |
+| Heading "Downloads" (âncora do painel) | `getByRole('heading', { name: 'Downloads', level: 3 })` | Funcional | Único H3 com esse texto; só visível quando painel aberto | Adicionar `data-testid="downloads-panel-heading"` |
 | Botão "Marcar todas como lidas" | `getByRole('button', { name: 'Marcar todas como lidas' })` | Funcional | Texto único | Adicionar `data-testid="mark-all-read-button"` |
-| Botão "Abrir" (item de download) | `getByRole('button', { name: 'Abrir' })` (dentro da região) | Funcional | Scoped pela região do painel | Adicionar `data-testid` por item se automação for necessária |
-| Botão "Prox" (paginação do painel) | Ambíguo com "Prox" da lista | **Frágil** | Mesmo texto, dois contextos simultâneos | Scoping pelo painel resolveria; ou testid distinto |
+| Botão "Abrir" (item de download) | `getByRole('button', { name: 'Abrir' })` (page-level) | Funcional | Texto único no contexto do painel | Adicionar `data-testid` por item se automação for necessária |
+| Fechar painel (toggle) | `getByRole('button', { name: 'Notificações' }).click()` | Funcional | Segundo clique fecha; Escape NÃO fecha | Solicitar suporte a Escape (a11y) ao time de front-end |
+| Botão fechar (ícone-only) | `???` | **Ausente** | Sem aria-label, sem testId | Adicionar `aria-label="Fechar painel de downloads"` |
+| Botão "Prox" (paginação do painel) | Ambíguo com "Prox" da lista | **Frágil** | Mesmo texto, dois contextos simultâneos | Scoping pelo heading pai resolveria; ou testid distinto |
 
 ---
 
