@@ -7,6 +7,7 @@ Suítes existentes:
 - **@readonly** — 10 testes estáveis, execução padrão, sem side effects.
 - **@export** — base técnica criada, protegida por `ENABLE_EXPORT_TESTS=true`, bloqueada por seletor de front-end.
 - **@api-key** — base técnica criada, protegida por `ENABLE_API_KEY_TESTS=true`, bloqueada por seletor de front-end.
+- **@table-create** — base técnica criada, protegida por `ENABLE_DESTRUCTIVE=true` **e** `ENABLE_TABLE_CREATE_TESTS=true`, bloqueada por seletores de front-end.
 
 ---
 
@@ -27,6 +28,7 @@ tests/
   tabelas/          # Suíte @readonly (10 specs)
   export/           # Suíte @export — base técnica, requer flag
   api-keys/         # Suíte @api-key — base técnica, requer flag
+  tables-create/    # Suíte @table-create — base técnica, requer duas flags
 helpers/            # Helpers reutilizáveis (emailClient, notifications)
 scripts/            # Wrappers de execução com flag guard
 docs/               # Documentação de suítes, tickets de testabilidade
@@ -134,6 +136,7 @@ Os testes existentes são **exclusivamente readonly**, com exceção das suítes
 **Suítes controladas criadas (bloqueadas por front-end):**
 - `@export` — base criada em `tests/export/`, bloqueada por `data-testid="table-actions-menu-button"` (Card 8)
 - `@api-key` — base criada em `tests/api-keys/`, bloqueada por `data-testid="api-keys-menu-button"` (Card 9)
+- `@table-create` — base criada em `tests/tables-create/`, bloqueada por seletores de criação/deleção (Card 10); requer `ENABLE_DESTRUCTIVE=true` + `ENABLE_TABLE_CREATE_TESTS=true`
 
 ---
 
@@ -166,6 +169,8 @@ Os testes existentes são **exclusivamente readonly**, com exceção das suítes
 | `evidence:export` | `npm run evidence:export` | Coleta evidências da exportação (requer `ENABLE_EXPORT_TESTS=true`) |
 | `test:api-keys` | `npm run test:api-keys` | Executa suíte `@api-key` (requer `ENABLE_API_KEY_TESTS=true`) |
 | `evidence:api-keys` | `npm run evidence:api-keys` | Coleta evidências de API Keys (requer `ENABLE_API_KEY_TESTS=true`) |
+| `test:table-create` | `npm run test:table-create` | Executa suíte `@table-create` (requer `ENABLE_DESTRUCTIVE=true` e `ENABLE_TABLE_CREATE_TESTS=true`) |
+| `evidence:table-create` | `npm run evidence:table-create` | Coleta evidências de criação de tabela (requer ambas as flags) |
 | `test` | `npm test` | Executa toda a suíte (inclui setup) |
 | `codegen` | `npm run codegen` | Abre codegen sem autenticação |
 | `codegen:auth` | `npm run codegen:auth` | Abre codegen com storageState carregado |
@@ -178,4 +183,5 @@ Os testes existentes são **exclusivamente readonly**, com exceção das suítes
 1. **Revisão de locators frágeis** — substituir `nth(1)` do card de empresa e combobox sem label por seletores estáveis, após solicitação ao time de front-end (`data-testid`, `aria-label`, `aria-sort`).
 2. **Desbloqueio da suíte @export** — base criada em `tests/export/`. Bloqueada por `data-testid="table-actions-menu-button"` ausente no front-end (Card 8 em `docs/frontend-testability-tickets.md`).
 3. **Desbloqueio da suíte @api-key** — base criada em `tests/api-keys/`. Bloqueada por `data-testid="api-keys-menu-button"` ausente no front-end (Card 9 em `docs/frontend-testability-tickets.md`). Execução real validada até o ponto do bloqueio em 2026-05-11 — sessão ok, empresa selecionada, nenhuma chave criada.
-4. **Fluxos destrutivos controlados** — criar massa sintética, definir rollback, separar specs com tag `@destructive` e proteger por `ENABLE_DESTRUCTIVE=true`. Nunca rodar por padrão.
+4. **Desbloqueio da suíte @table-create** — base criada em `tests/tables-create/`. Bloqueada por 7 seletores ausentes no front-end (Card 10 em `docs/frontend-testability-tickets.md`). Nenhuma execução real realizada. Protegida por `ENABLE_DESTRUCTIVE=true` + `ENABLE_TABLE_CREATE_TESTS=true`.
+5. **Fluxos destrutivos controlados** — suíte `@table-create` é o primeiro exemplo: nome com prefixo de segurança, cleanup no `finally`, deleção restrita ao prefixo `qa_tabela_aut_`.

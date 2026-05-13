@@ -494,6 +494,100 @@ O seletor posicional gerado pelo Codegen para este botão pode aparecer em docum
 
 ---
 
+## Card 10 — Seletores para criação e deleção de tabela (bloqueador de @table-create)
+
+**Título:**
+`[InTable][Testability] Adicionar seletores estáveis no fluxo de criação e deleção de tabela`
+
+**Prioridade:** Alta
+
+**Contexto:**
+A suíte `@table-create` já foi criada em `tests/tables-create/create-table.spec.js`, mas a execução real está bloqueada porque nenhum dos elementos do fluxo de criação ou deleção possui seletor estável no DOM.
+
+**Problema observado:**
+O fluxo de criação de tabela envolve múltiplos elementos (botão de abertura, formulário, campos, confirmação) e o fluxo de deleção envolve botão por linha e diálogo de confirmação. Sem `data-testid`, o Playwright precisa usar seletores frágeis por texto, classe CSS ou posição no DOM.
+
+O teste usa `getByTestId(...)` em cada passo e falha com mensagem clara enquanto os atributos não existirem.
+
+**Impacto:**
+Sem esses ajustes, o teste não consegue:
+1. Abrir o formulário de criação.
+2. Preencher o nome da tabela.
+3. Selecionar o departamento.
+4. Confirmar a criação.
+5. Localizar e clicar no botão de deleção da tabela criada.
+6. Confirmar a deleção.
+
+Isso bloqueia o fluxo completo:
+
+```
+/tables → "Nova Tabela" → nome + departamento → confirmar →
+validar na lista → deletar linha → confirmar → validar remoção
+```
+
+**Pedido ao front-end:**
+Adicionar os seguintes `data-testid` nos elementos correspondentes:
+
+```html
+<!-- Botão que abre o formulário de criação (na barra de ações de /tables) -->
+<button data-testid="create-table-button">Nova Tabela</button>
+
+<!-- Campo de nome no formulário de criação -->
+<input data-testid="table-name-input" />
+
+<!-- Dropdown de departamento no formulário -->
+<div data-testid="table-department-select">...</div>
+
+<!-- Cada opção no dropdown de departamento -->
+<div data-testid="table-department-option-testes">testes</div>
+<div data-testid="table-department-option-inbot">inbot</div>
+
+<!-- Botão de confirmação de criação no formulário -->
+<button data-testid="confirm-create-table">Criar</button>
+
+<!-- Botão de deleção na linha da tabela (em /tables, por row) -->
+<button data-testid="delete-table-button" aria-label="Excluir tabela">...</button>
+
+<!-- Botão de confirmação de deleção no diálogo -->
+<button data-testid="confirm-delete-table">Sim, Excluir</button>
+```
+
+**Critério de aceite:**
+
+```js
+// Abrir formulário
+await page.getByTestId('create-table-button').click()
+
+// Preencher nome
+await page.getByTestId('table-name-input').fill('qa_tabela_aut_1234567890')
+
+// Selecionar departamento
+await page.getByTestId('table-department-select').click()
+await page.getByTestId('table-department-option-testes').click()
+
+// Confirmar criação
+await page.getByTestId('confirm-create-table').click()
+
+// Deletar da lista
+const row = page.getByRole('row').filter({ hasText: 'qa_tabela_aut_1234567890' })
+await row.getByTestId('delete-table-button').click()
+await page.getByTestId('confirm-delete-table').click()
+```
+
+**Seletores com fallback no spec (enquanto data-testid não existir):**
+
+| Fallback tentado | Passo |
+|---|---|
+| `getByRole('button', { name: /criar\|salvar\|confirmar/i })` | Confirmar criação |
+| `getByRole('button', { name: /excluir\|deletar\|remover/i })` | Botão de deleção no row |
+| `getByRole('button', { name: /sim\|confirmar\|excluir/i })` | Confirmar deleção |
+| `getByRole('combobox', { name: /departamento/i })` | Dropdown de departamento |
+| `getByRole('option', { name: TEST_DEPARTMENT, exact: true })` | Opção no dropdown |
+
+Os fallbacks são tentados na ordem — se nenhum funcionar, o teste falha com mensagem explicando qual `data-testid` adicionar.
+
+---
+
 ## Resumo de prioridade
 
 | Prioridade  | Card                                                      |
@@ -503,6 +597,7 @@ O seletor posicional gerado pelo Codegen para este botão pode aparecer em docum
 | Alta        | Card da empresa na Home                                   |
 | Alta        | Botão menu de ações da tabela (bloqueador @export)        |
 | Alta        | Botão menu de API Keys (bloqueador @api-key)              |
+| Alta        | Seletores de criação/deleção de tabela (bloqueador @table-create) |
 | Média       | Combobox de itens por página                              |
 | Média       | Cabeçalhos com aria-sort                                  |
 | Média       | Botões de ação com aria-label                             |
