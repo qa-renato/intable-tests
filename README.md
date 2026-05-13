@@ -20,6 +20,7 @@ Suítes existentes:
 | [`docs/test-data-strategy.md`](docs/test-data-strategy.md) | Regras de massa sintética, prefixos e cleanup |
 | [`docs/automation-roadmap.md`](docs/automation-roadmap.md) | Matriz de 52 funcionalidades e backlog por fase |
 | [`docs/frontend-testability-tickets.md`](docs/frontend-testability-tickets.md) | Cards de testabilidade para o time de front-end |
+| [`docs/post-frontend-fix-checklist.md`](docs/post-frontend-fix-checklist.md) | Checklist de retomada após ajustes do front-end |
 | [`docs/export-tests.md`](docs/export-tests.md) | Documentação detalhada da suíte @export |
 | [`docs/api-key-tests.md`](docs/api-key-tests.md) | Documentação detalhada da suíte @api-key |
 | [`docs/table-create-tests.md`](docs/table-create-tests.md) | Documentação detalhada da suíte @table-create |
@@ -173,10 +174,25 @@ Os testes existentes são **exclusivamente readonly**, com exceção das suítes
 
 ---
 
+## Quality gate
+
+```bash
+npm run check:safe     # sintaxe JS + guards — sem sessão, sem flags, roda no CI
+npm run check:readonly # testes @readonly — requer sessão autenticada válida
+```
+
+`check:safe` verifica sintaxe de todos os arquivos JS e confirma que nenhuma suíte controlada inicia Playwright sem as flags corretas. Não requer autenticação, não cria dados e pode rodar no GitHub Actions. O workflow `.github/workflows/safe-checks.yml` executa `check:safe` em todo push e pull request.
+
+`check:readonly` é um alias para `npm run test:readonly` e requer `fixtures/.auth/user.json` válido. Deve ser rodado localmente antes de cada release ou quando houver suspeita de regressão.
+
+---
+
 ## Scripts disponíveis
 
 | Script | Comando | Descrição |
 |---|---|---|
+| `check:safe` | `npm run check:safe` | Syntax check + guards — sem sessão, roda no CI |
+| `check:readonly` | `npm run check:readonly` | Alias para `test:readonly` — requer sessão |
 | `setup` | `npm run setup` | Gera `fixtures/.auth/user.json` via SSO |
 | `test:readonly` | `npm run test:readonly` | Executa todos os testes `@readonly` |
 | `evidence:readonly` | `npm run evidence:readonly` | Coleta evidências da suíte `@readonly` |

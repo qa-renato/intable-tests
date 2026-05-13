@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "Automação Playwright para o módulo InTable — intable.inbot.com.br",
   "scripts": {
+    "check:safe": "bash scripts/check-safe.sh",
+    "check:readonly": "npm run test:readonly",
     "setup": "npx playwright test --project=setup --reporter=line",
     "test:readonly": "BASE_URL=https://intable.inbot.com.br ENABLE_DESTRUCTIVE=false npx playwright test tests/tabelas --grep \"@readonly\" --reporter=line",
     "test:export": "node scripts/run-export.js",

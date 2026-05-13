@@ -43,10 +43,42 @@ Sempre usar `read -s USER_PASSWORD` para captura interativa.
 
 ---
 
-## 2. Como rodar a suíte @readonly
+## 2. Como rodar o quality gate seguro (check:safe)
+
+```bash
+npm run check:safe
+```
+
+O `check:safe` roda apenas verificações estáticas — **não requer sessão autenticada, não requer credenciais, não inicia o Playwright, não cria nenhum dado**.
+
+O que ele verifica:
+1. **Sintaxe JS** — `node --check` em todos os arquivos JS principais.
+2. **Guards das suítes controladas** — confirma que `@export`, `@api-key` e `@table-create` encerram com exit 0 e mensagem de suíte desativada quando rodados sem flags.
+
+**Pode rodar no CI** (GitHub Actions, sem secrets). O workflow `.github/workflows/safe-checks.yml` executa `check:safe` automaticamente em todo push e pull request.
+
+**Quando rodar localmente:**
+- Antes de qualquer commit
+- Ao criar ou modificar specs, helpers ou scripts
+- Para confirmar que os guards funcionam após mudanças no `package.json`
+
+**Resultado esperado:**
+```
+=== Safe Quality Gate: PASSED ===
+  Sintaxe verificada:    9 arquivos
+  Guards verificados:    @export, @api-key, @table-create
+  Playwright invocado:   NÃO
+  Dados criados:         NENHUM
+```
+
+---
+
+## 4. Como rodar a suíte @readonly
 
 ```bash
 npm run test:readonly
+# ou
+npm run check:readonly   # alias equivalente
 ```
 
 O setup valida a sessão automaticamente antes de executar os testes.
@@ -61,7 +93,7 @@ Renove a sessão (seção 1) e rode novamente.
 
 ---
 
-## 3. Como gerar evidências da suíte @readonly
+## 5. Como gerar evidências da suíte @readonly
 
 ```bash
 npm run evidence:readonly
@@ -75,7 +107,7 @@ Nenhum desses arquivos deve ser commitado (cobertos pelo `.gitignore`).
 
 ---
 
-## 4. Como abrir o relatório HTML
+## 6. Como abrir o relatório HTML
 
 ```bash
 npm run report
@@ -86,7 +118,7 @@ Requer que `npm run evidence:readonly` (ou outra suíte) tenha sido executado an
 
 ---
 
-## 5. Como rodar suítes controladas (apenas quando autorizadas)
+## 7. Como rodar suítes controladas (apenas quando autorizadas)
 
 ### @export
 
@@ -134,7 +166,7 @@ npm run test:table-create
 
 ---
 
-## 6. Flags de controle — referência rápida
+## 8. Flags de controle — referência rápida
 
 | Flag | Suíte | Obrigatória | Default |
 |---|---|---|---|
@@ -149,7 +181,7 @@ Nunca adicionar essas flags a scripts padrão ou ao `npm test`.
 
 ---
 
-## 7. O que nunca deve ser commitado
+## 9. O que nunca deve ser commitado
 
 | O que | Por quê |
 |---|---|
@@ -166,7 +198,7 @@ Todos esses padrões estão no `.gitignore`. Verificar com `git status` antes de
 
 ---
 
-## 8. Como agir se a sessão expirar durante uma rodada
+## 10. Como agir se a sessão expirar durante uma rodada
 
 O setup detecta sessão expirada automaticamente e tenta fazer novo login.
 Se as credenciais não estiverem no ambiente, o setup falha com:
@@ -184,7 +216,7 @@ Error: Credenciais ausentes e sem storageState válido em fixtures/.auth/user.js
 
 ---
 
-## 9. Como agir se um teste destrutivo falhar após criar massa
+## 11. Como agir se um teste destrutivo falhar após criar massa
 
 ### @api-key — chave não revogada
 
@@ -213,10 +245,12 @@ Error: Credenciais ausentes e sem storageState válido em fixtures/.auth/user.js
 
 ---
 
-## 10. Scripts disponíveis — referência completa
+## 12. Scripts disponíveis — referência completa
 
 | Script | Comando | Requer flag |
 |---|---|---|
+| Quality gate seguro | `npm run check:safe` | não (sem sessão, sem flags) |
+| Readonly local | `npm run check:readonly` | sessão válida |
 | Setup de autenticação | `npm run setup` | credenciais no env |
 | Suíte @readonly | `npm run test:readonly` | não |
 | Evidências @readonly | `npm run evidence:readonly` | não |

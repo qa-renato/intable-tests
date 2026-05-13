@@ -1,0 +1,26 @@
+name: Safe Quality Gate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  safe-checks:
+    name: Syntax and guard checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run safe quality gate
+        run: npm run check:safe
