@@ -8,3 +8,9 @@ node_modules/
 .env.*
 !.env.example
 downloads/
+
+# Artefatos de execução Playwright (proteção adicional fora do outputDir)
+*.webm
+*.zip
+*.png
+

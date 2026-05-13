@@ -11,6 +11,21 @@ Suítes existentes:
 
 ---
 
+## Documentação útil
+
+| Documento | Conteúdo |
+|---|---|
+| [`docs/execution-runbook.md`](docs/execution-runbook.md) | Como renovar sessão, rodar suítes, agir em falhas destrutivas |
+| [`docs/preflight-checklist.md`](docs/preflight-checklist.md) | Checklist pré-execução por suíte |
+| [`docs/test-data-strategy.md`](docs/test-data-strategy.md) | Regras de massa sintética, prefixos e cleanup |
+| [`docs/automation-roadmap.md`](docs/automation-roadmap.md) | Matriz de 52 funcionalidades e backlog por fase |
+| [`docs/frontend-testability-tickets.md`](docs/frontend-testability-tickets.md) | Cards de testabilidade para o time de front-end |
+| [`docs/export-tests.md`](docs/export-tests.md) | Documentação detalhada da suíte @export |
+| [`docs/api-key-tests.md`](docs/api-key-tests.md) | Documentação detalhada da suíte @api-key |
+| [`docs/table-create-tests.md`](docs/table-create-tests.md) | Documentação detalhada da suíte @table-create |
+
+---
+
 ## Stack
 
 - Node.js
