@@ -574,6 +574,12 @@ await row.getByTestId('delete-table-button').click()
 await page.getByTestId('confirm-delete-table').click()
 ```
 
+**Observação (inspeção DOM 2026-05-13):**
+- Na home (`/`), existe um botão "Nova Base" que também inicia o fluxo de criação de tabela.
+  Ele deve receber `data-testid="create-table-button"` ou equivalente para cobrir a criação via home.
+- Na lista `/tables`, o botão "Criar Nova" foi capturado como `disabled: true` durante o carregamento
+  inicial. Verificar se é restrição de permissão do usuário de teste ou estado temporário de loading.
+
 **Seletores com fallback no spec (enquanto data-testid não existir):**
 
 | Fallback tentado | Passo |

@@ -24,6 +24,8 @@ Suítes existentes:
 | [`docs/export-tests.md`](docs/export-tests.md) | Documentação detalhada da suíte @export |
 | [`docs/api-key-tests.md`](docs/api-key-tests.md) | Documentação detalhada da suíte @api-key |
 | [`docs/table-create-tests.md`](docs/table-create-tests.md) | Documentação detalhada da suíte @table-create |
+| [`docs/ui-action-inventory.md`](docs/ui-action-inventory.md) | Inventário de ações da UI por tela — status de cobertura e priorização |
+| [`docs/locator-inventory.md`](docs/locator-inventory.md) | Inventário de locators — classificação estável/frágil/ausente por elemento |
 
 ---
 
