@@ -1,6 +1,6 @@
 # InTable — Roadmap de Automação E2E
 
-_Estado em 2026-05-12. Gerado a partir da análise do código existente, documentação e inspeção das telas. Nenhuma execução destrutiva foi realizada._
+_Atualizado em 2026-05-13 após expansão da suíte @readonly (10 → 14 testes). Gerado a partir da análise do código existente, documentação e inspeção das telas. Nenhuma execução destrutiva foi realizada._
 
 ---
 
@@ -10,8 +10,8 @@ _Estado em 2026-05-12. Gerado a partir da análise do código existente, documen
 
 | Métrica | Valor |
 |---|---|
-| Specs existentes | 11 arquivos |
-| Testes automatizados (estáveis) | 10 (`@readonly`) |
+| Specs existentes | 14 arquivos |
+| Testes automatizados (estáveis) | 14 (`@readonly`) |
 | Suítes com base técnica criada | 3 (`@export`, `@api-key`, `@table-create`) |
 | Suítes em execução real | 1 (`@readonly`) |
 | Suítes bloqueadas por front-end | 3 |
@@ -22,7 +22,7 @@ _Estado em 2026-05-12. Gerado a partir da análise do código existente, documen
 
 | Suíte | Tags | Status | Flags necessárias |
 |---|---|---|---|
-| `tests/tabelas/` | `@readonly` | Estável — 10/10 passando | nenhuma |
+| `tests/tabelas/` | `@readonly` | Estável — 14/14 passando (11 spec files) | nenhuma |
 | `tests/export/` | `@export @integration @notification @download` | Base técnica criada — bloqueado | `ENABLE_EXPORT_TESTS=true` |
 | `tests/api-keys/` | `@api-key @integration @destructive` | Base técnica criada — bloqueado | `ENABLE_API_KEY_TESTS=true` |
 | `tests/tables-create/` | `@crud @table-create @destructive @integration` | Base técnica criada — bloqueado | `ENABLE_DESTRUCTIVE=true` + `ENABLE_TABLE_CREATE_TESTS=true` |
@@ -38,7 +38,7 @@ _Estado em 2026-05-12. Gerado a partir da análise do código existente, documen
 1. Resolver Cards 8, 9 e 10 junto ao time de front-end.
 2. Executar a primeira rodada real de `@export` assim que Card 8 for implementado.
 3. Executar a primeira rodada real de `@api-key` assim que Card 9 for implementado.
-4. Ampliar `@readonly` com filtro por empresa (requer Card 1) e filtro por data (requer Card 7).
+4. Ampliar `@readonly` com filtro por empresa (requer Card 1) e filtro por data (requer Card 7). _(3 novas specs entregues em 2026-05-13: `home-stats`, `notifications-panel`, `ordenacao-colunas` — ver Seção 3.)_
 5. Planejar `@table-create` com massa sintética após Card 10.
 
 ---
@@ -65,6 +65,8 @@ Legenda de **status**:
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | Home | Carregar tela de seleção de empresa | readonly | Baixo | automatizado | nenhuma | não | não | não | — | — | Coberto em `smoke.spec.js` |
 | Home | Selecionar empresa inbot | readonly | Baixo | automatizado | nenhuma | não | não | não | `empresa-card-inbot` (Card 3) | Alta | Usa `nth(1)` frágil; Card 3 pendente |
+| Home | Verificar seções da home (Suas bases de dados, Pulsos do ecossistema, Notificações, Ver todas) | readonly | Baixo | automatizado | nenhuma | não | não | não | — | — | Coberto em `home-stats.spec.js` |
+| Home | Navegar para lista de tabelas via "Ver todas" | readonly | Baixo | automatizado | nenhuma | não | não | não | — | — | Coberto em `home-stats.spec.js` |
 | Home | Buscar empresa pelo campo de texto | readonly | Baixo | candidato futuro | nenhuma | não | não | não | `empresa-card-{nome}` (Card 3) | Média | Depende de Card 3 para seleção estável |
 | Home | Selecionar empresa diferente de inbot | readonly | Baixo | candidato futuro | nenhuma | não | não | não | `empresa-card-{nome}` (Card 3) | Baixa | Requer empresa de massa sintética |
 
@@ -81,6 +83,8 @@ Legenda de **status**:
 | /tables | Paginar para página anterior | readonly | Baixo | automatizado | nenhuma | não | não | não | — | — | Coberto em `paginacao.spec.js` |
 | /tables | Alterar tamanho de página (10 → 25 → 10) | readonly | Baixo | automatizado | nenhuma | não | não | não | `aria-label="Itens por página"` (Card 4) | — | Coberto em `tamanho-pagina.spec.js`; Card 4 para robustez |
 | /tables | Ordenar por "Nome da Tabela" | readonly | Baixo | automatizado | nenhuma | não | não | não | `aria-sort` (Card 5) | — | Coberto em `ordenacao.spec.js`; skip se não detectável sem `aria-sort` |
+| /tables | Ordenar por colunas adicionais (Empresa, Departamento, Criada em, Alterada em) | readonly | Baixo | automatizado | nenhuma | não | não | não | `aria-sort` (Card 5) | — | Coberto em `ordenacao-colunas.spec.js`; valida grid íntegro após cada clique; direção aguarda Card 5 |
+| /tables | Abrir painel de downloads (Notificações) e validar estrutura | readonly | Baixo | automatizado | nenhuma | não | não | não | — | — | Coberto em `notifications-panel.spec.js`; fecha via toggle (Escape não fecha — achado de a11y) |
 | /tables | Expandir painel de Filtros | readonly | Baixo | automatizado | nenhuma | não | não | não | — | — | Coberto em `smoke.spec.js` |
 | /tables | Filtrar por departamento (ex: testes) | readonly | Baixo | automatizado | nenhuma | não | não | não | `departamento-option-testes` (Card 2) | — | Coberto em `filtros.spec.js`; usa fallback por enquanto |
 | /tables | Filtrar por empresa (dropdown) | readonly | Baixo | bloqueado por front | nenhuma | não | não | **sim** | `empresa-option-{nome}` (Card 1) | Alta | Dropdown não tem semântica ARIA/role=option |
@@ -146,11 +150,12 @@ Legenda de **status**:
 
 ## 3. Cobertura atual
 
-### @readonly — 10 specs estáveis
+### @readonly — 14 testes estáveis (11 spec files)
 
 **Localização:** `tests/tabelas/`  
-**Status:** Estável. Passam em execuções repetidas (30/30 validadas sem flake).  
-**Flag:** nenhuma. Executam por padrão.
+**Status:** Estável. 14/14 passando. Expandida em 2026-05-13 com 3 novos specs.  
+**Flag:** nenhuma. Executam por padrão.  
+**Commit:** `91adcdf`
 
 | Spec | Cenários cobertos |
 |---|---|
@@ -162,12 +167,20 @@ Legenda de **status**:
 | `empty-state.spec.js` | Busca sem resultado, empty state "Nenhuma tabela encontrada", recuperação ao limpar |
 | `tamanho-pagina.spec.js` | Alterar para 25 itens, validar paginação, restaurar para 10 |
 | `ordenacao.spec.js` | Clique em "Nome da Tabela", validação de reordenação; skip documentado quando mudança não é observável |
+| `home-stats.spec.js` _(novo)_ | Seções da home: "Suas bases de dados", "Pulsos do ecossistema", botão Notificações, botão "Ver todas"; navegação para `/tables` via "Ver todas" |
+| `notifications-panel.spec.js` _(novo)_ | Abertura do painel de downloads, heading "Downloads", botão "Marcar todas como lidas" (presença apenas), fechamento via toggle |
+| `ordenacao-colunas.spec.js` _(novo)_ | Colunas Empresa, Departamento, Criada em, Alterada em — verifica grid intacto após cada clique; direção aguarda `aria-sort` (Card 5) |
 
 **Limitações atuais:**
 - Filtro por empresa bloqueado por Card 1 (dropdown sem semântica ARIA).
 - Filtro por data bloqueado por Card 7 (datepicker sem data completa no `aria-label`).
-- Ordenação usa skip como fallback quando lista já ordenada ou `aria-sort` ausente (Card 5).
+- Ordenação de colunas valida integridade do grid mas não a direção — aguarda `aria-sort` (Card 5).
 - Seleção de empresa usa `nth(1)` frágil — Card 3 pendente.
+
+**Achado de acessibilidade (2026-05-13):**  
+O popover de Notificações não fecha ao pressionar `Escape` — comportamento não conforme com WAI-ARIA.  
+O fechamento correto é via segundo clique no botão "Notificações" (toggle).  
+Documentado em `docs/locator-inventory.md` — Área 3. Sugestão de correção ao time de front-end.
 
 ---
 
@@ -243,18 +256,21 @@ npm run test:export
 
 ## 4. Backlog sugerido de automação
 
-### Fase 1 — Consolidar readonly (agora)
+### Fase 1 — Consolidar readonly (em andamento)
 
 Objetivo: maximizar a cobertura sem risco, sem depender de front-end.
 
-| Ação | Spec alvo | Dependência |
-|---|---|---|
-| Ampliar `smoke.spec.js` com validação da contagem de linhas por página | `tests/tabelas/smoke.spec.js` | nenhuma |
-| Adicionar spec de filtro combinado (dept + empresa) | `tests/tabelas/filtros.spec.js` | Card 1 (empresa) |
-| Substituir `nth(1)` da empresa por seletor estável | `pages/intable/tabelas.page.js` | Card 3 |
-| Adicionar `aria-label="Itens por página"` e usar no test | `pages/intable/tabelas.page.js` | Card 4 |
-| Tornar `ordenacao.spec.js` determinístico | `tests/tabelas/ordenacao.spec.js` | Card 5 |
-| Spec de filtro por data (criada em / alterada em) | `tests/tabelas/filtros.spec.js` | Card 7 |
+| Ação | Spec alvo | Dependência | Status |
+|---|---|---|---|
+| ~~Adicionar spec de home (seções e navegação)~~ | ~~`home-stats.spec.js`~~ | ~~nenhuma~~ | **Entregue** (2026-05-13) |
+| ~~Adicionar spec do painel de downloads~~ | ~~`notifications-panel.spec.js`~~ | ~~nenhuma~~ | **Entregue** (2026-05-13) |
+| ~~Adicionar spec de ordenação por colunas adicionais~~ | ~~`ordenacao-colunas.spec.js`~~ | ~~nenhuma~~ | **Entregue** (2026-05-13) |
+| Ampliar `smoke.spec.js` com validação da contagem de linhas por página | `tests/tabelas/smoke.spec.js` | nenhuma | Pendente |
+| Adicionar spec de filtro combinado (dept + empresa) | `tests/tabelas/filtros.spec.js` | Card 1 (empresa) | Pendente (bloqueado) |
+| Substituir `nth(1)` da empresa por seletor estável | `pages/intable/tabelas.page.js` | Card 3 | Pendente (bloqueado) |
+| Adicionar `aria-label="Itens por página"` e usar no test | `pages/intable/tabelas.page.js` | Card 4 | Pendente (bloqueado) |
+| Tornar `ordenacao.spec.js` determinístico | `tests/tabelas/ordenacao.spec.js` | Card 5 | Pendente (bloqueado) |
+| Spec de filtro por data (criada em / alterada em) | `tests/tabelas/filtros.spec.js` | Card 7 | Pendente (bloqueado) |
 
 ---
 
