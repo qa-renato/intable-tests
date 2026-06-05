@@ -31,9 +31,22 @@ Suítes existentes:
 
 ## Stack
 
-- Node.js
-- Playwright
+- Node.js (CI usa Node 20)
+- Playwright (`@playwright/test`, **pinado em 1.59.1** em `devDependencies`)
 - JavaScript
+
+---
+
+## Instalação
+
+```bash
+npm ci                            # instala as dependências (inclui @playwright/test 1.59.1) de forma determinística
+npx playwright install chromium   # baixa o browser da versão correta
+```
+
+> O Playwright é uma dependência versionada do projeto — **não** depende de instalação global.
+> `npm ci` instala exatamente a 1.59.1 do lockfile; `npx playwright install chromium` traz o
+> browser compatível. Em seguida, gere a sessão (ver "Gerar sessão autenticada") antes de rodar.
 
 ---
 
@@ -43,7 +56,7 @@ Suítes existentes:
 fixtures/           # Setup global de autenticação (storageState)
 pages/              # Page objects (seletores e métodos por tela)
 tests/
-  tabelas/          # Suíte @readonly (10 specs)
+  tabelas/          # Suíte @readonly (14 testes, 11 specs)
   export/           # Suíte @export — base técnica, requer flag
   api-keys/         # Suíte @api-key — base técnica, requer flag
   tables-create/    # Suíte @table-create — base técnica, requer duas flags
