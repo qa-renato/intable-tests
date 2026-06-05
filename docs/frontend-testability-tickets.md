@@ -116,6 +116,10 @@ Remove fallback frágil e permite evoluir testes de múltiplos departamentos.
 
 ## Card 3 — Card de empresa na Home
 
+> ✅ **IMPLEMENTADO pelo front-end** (confirmado no DOM em 2026-06-04). O card expõe
+> `data-testid="empresa-card-inbot"` (padrão `empresa-card-{nome}`). Page object já migrado
+> de `nth(1)` para `getByTestId('empresa-card-inbot')`. Card encerrado.
+
 **Título:**
 `[InTable][Testability] Adicionar seletor estável no card da empresa`
 
@@ -167,6 +171,10 @@ Elimina dependência de `nth(1)`.
 ---
 
 ## Card 4 — Combobox de itens por página
+
+> ✅ **IMPLEMENTADO pelo front-end** (confirmado no DOM em 2026-06-04). O controle expõe
+> `aria-label="Itens por página"`. Page object já migrado de `getByRole('combobox')` para
+> `getByRole('combobox', { name: 'Itens por página' })`. Card encerrado.
 
 **Título:**
 `[InTable][A11y/Testability] Adicionar label acessível na combobox de itens por página`

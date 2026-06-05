@@ -4,6 +4,17 @@ _Atualizado em 2026-05-13 após expansão da suíte @readonly (10 → 14 testes)
 
 ---
 
+## Nota de manutenção — 2026-06-04
+
+Execução real da suíte `@readonly` contra produção após renovar a sessão. Resultado: **14/14 verde** em execução normal. Correções e achados desta rodada:
+
+- **Seletores endurecidos (Cards 3 e 4 já implementados pelo front):** card de empresa migrado de `nth(1)` para `getByTestId('empresa-card-inbot')`; combobox de itens/página de `getByRole('combobox')` genérico para `getByRole('combobox', { name: 'Itens por página' })`.
+- **`notifications-panel.spec.js`:** seletor `getByRole('button', { name: 'Notificações' })` passou a casar 2 elementos quando o painel abre (surgiu "Ver todas as notificações"). Corrigido com `exact: true`.
+- **`TabelasPage.goto()` — espera robusta:** removido `waitUntil: 'networkidle'` (a InTable faz polling ao vivo, a rede nunca fica ociosa → timeout intermitente). Navegar para `/` ainda dispara um **round-trip de SSO Keycloak** (refresh de token) que `domcontentloaded` sozinho não cobre; a espera agora ancora no campo "Buscar empresa..." da Home autenticada — determinístico contra polling e redirect. Os 4 `waitForLoadState('networkidle')` pós-ação viraram `domcontentloaded` (os specs já têm web-first assertions).
+- **Achado de fragilidade de infra (não da suíte):** sob estresse (`--repeat-each=3`, dezenas de re-autenticações SSO em sequência) o app volta do Keycloak com `?code` e por vezes **não renderiza a Home** — coerente com o bug de refresh de token Keycloak/CORS já visto no stack Inbot. Recomendação: não martelar o SSO em CI; rodar a suíte 1x por execução.
+
+---
+
 ## 1. Resumo executivo
 
 ### Estado atual
@@ -267,8 +278,8 @@ Objetivo: maximizar a cobertura sem risco, sem depender de front-end.
 | ~~Adicionar spec de ordenação por colunas adicionais~~ | ~~`ordenacao-colunas.spec.js`~~ | ~~nenhuma~~ | **Entregue** (2026-05-13) |
 | Ampliar `smoke.spec.js` com validação da contagem de linhas por página | `tests/tabelas/smoke.spec.js` | nenhuma | Pendente |
 | Adicionar spec de filtro combinado (dept + empresa) | `tests/tabelas/filtros.spec.js` | Card 1 (empresa) | Pendente (bloqueado) |
-| Substituir `nth(1)` da empresa por seletor estável | `pages/intable/tabelas.page.js` | Card 3 | Pendente (bloqueado) |
-| Adicionar `aria-label="Itens por página"` e usar no test | `pages/intable/tabelas.page.js` | Card 4 | Pendente (bloqueado) |
+| ~~Substituir `nth(1)` da empresa por seletor estável~~ | `pages/intable/tabelas.page.js` | Card 3 ✅ | **Entregue (2026-06-04)** — `getByTestId('empresa-card-inbot')` |
+| ~~Adicionar `aria-label="Itens por página"` e usar no test~~ | `pages/intable/tabelas.page.js` | Card 4 ✅ | **Entregue (2026-06-04)** — `getByRole('combobox', { name: 'Itens por página' })` |
 | Tornar `ordenacao.spec.js` determinístico | `tests/tabelas/ordenacao.spec.js` | Card 5 | Pendente (bloqueado) |
 | Spec de filtro por data (criada em / alterada em) | `tests/tabelas/filtros.spec.js` | Card 7 | Pendente (bloqueado) |
 

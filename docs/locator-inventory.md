@@ -1,6 +1,7 @@
 # InTable QA — Inventário de Locators
 
 _Gerado via inspeção DOM read-only em 2026-05-13._
+_Atualizado em 2026-06-04: front-end implementou Cards 3 e 4 — card de empresa e combobox de itens/página agora são **Estáveis**. Seletor de Notificações exige `exact:true`._
 _Referência para avaliar fragilidade dos seletores existentes e priorizar pedidos ao front-end._
 
 ---
@@ -22,12 +23,12 @@ _Referência para avaliar fragilidade dos seletores existentes e priorizar pedid
 |---|---|---|---|---|
 | Heading "Selecione uma empresa" | `getByRole('heading', { name: 'Selecione uma empresa para visualizar', level: 3 })` | Funcional | Texto fixo, role semântico | Adicionar `data-testid="select-company-heading"` |
 | Input "Buscar empresa..." | `getByRole('textbox', { name: 'Buscar empresa...' })` | Funcional | Placeholder usado como âncora ARIA | Adicionar `aria-label="Buscar empresa"` ou testid |
-| Card empresa "inbot" | `locator('div').filter({ hasText: /^inbot$/ }).nth(1)` | **Frágil** | Depende de posição (`nth`) e texto; `<div>` sem role | Adicionar `data-testid="empresa-inbot"` ou `role="button"` + `aria-label` |
-| Card empresa "azul" | `locator('div').filter({ hasText: /^azul$/ }).nth(0)` | **Frágil** | Mesma fragilidade — derivado do padrão anterior | Adicionar `data-testid="empresa-azul"` |
+| Card empresa "inbot" | `getByTestId('empresa-card-inbot')` | **Estável** | Front implementou `data-testid="empresa-card-{nome}"` (Card 3 ✅, confirmado 2026-06-04) | — |
+| Card empresa "azul" | `getByTestId('empresa-card-azul')` | **Estável** | Mesmo padrão `empresa-card-{nome}` (Card 3 ✅) | — |
 | Botão "Nova Base" (criar tabela) | `getByRole('button', { name: 'Nova Base' })` | Funcional | Texto único na home — funciona hoje | Adicionar `data-testid="create-table-button"` (Card 10) |
 | Botão "Ver todas" (→ /tables) | `getByRole('button', { name: 'Ver todas' })` | Funcional | Texto visível, sem ambiguidade | Adicionar `data-testid="view-all-tables-button"` |
 | Botão "Limpar filtros" (home) | `getByRole('button', { name: 'Limpar filtros' })` | Funcional | Texto visível | Sem urgência |
-| Botão "Notificações" | `getByRole('button', { name: 'Notificações' })` | Funcional | Texto visível | Adicionar `data-testid="notifications-button"` para consistência |
+| Botão "Notificações" | `getByRole('button', { name: 'Notificações', exact: true })` | Funcional | `exact:true` obrigatório — com o painel aberto surge "Ver todas as notificações" (match não-exato viola strict mode, 2026-06-04) | Adicionar `data-testid="notifications-button"` |
 | Botão "Toggle sidebar" | `getByRole('button', { name: 'Toggle sidebar' })` | Funcional | Texto visível (pode ser só ícone) | Adicionar `aria-label="Abrir menu lateral"` |
 | Botão "Toggle theme" | `getByRole('button', { name: 'Toggle theme' })` | Funcional | Texto visível | Adicionar `aria-label="Alternar tema"` |
 | Botões ícone-only dos cards (home) | `???` | **Ausente** | ~12 botões `class="p-1 hover:bg-muted rounded"` sem aria-label, testid ou texto | Adicionar `aria-label` por ação (ex.: "Abrir tabela X", "Editar", "Excluir") |
@@ -88,7 +89,7 @@ _Referência para avaliar fragilidade dos seletores existentes e priorizar pedid
 | Informação de paginação | `getByText(/Mostrando \d+-\d+ de \d+ itens/)` | Funcional | Regex com padrão estável | Adicionar `data-testid="pagination-info"` para assert exato |
 | Botão "Prox" | `getByRole('button', { name: 'Prox' })` | Funcional | Texto fixo | Adicionar `aria-label="Próxima página"` |
 | Botão "Ant" | `getByRole('button', { name: 'Ant' })` | Funcional | Texto fixo | Adicionar `aria-label="Página anterior"` |
-| Combobox "N itens" | `getByRole('combobox')` | **Frágil** | Único combobox na tela — funciona por acidente | Adicionar `aria-label="Itens por página"` (Card sugerido) |
+| Combobox "N itens" | `getByRole('combobox', { name: 'Itens por página' })` | **Estável** | Front implementou `aria-label="Itens por página"` (Card 4 ✅, confirmado 2026-06-04) | — |
 
 ---
 
@@ -109,7 +110,7 @@ _Referência para avaliar fragilidade dos seletores existentes e priorizar pedid
 | Heading "Downloads" (âncora do painel) | `getByRole('heading', { name: 'Downloads', level: 3 })` | Funcional | Único H3 com esse texto; só visível quando painel aberto | Adicionar `data-testid="downloads-panel-heading"` |
 | Botão "Marcar todas como lidas" | `getByRole('button', { name: 'Marcar todas como lidas' })` | Funcional | Texto único | Adicionar `data-testid="mark-all-read-button"` |
 | Botão "Abrir" (item de download) | `getByRole('button', { name: 'Abrir' })` (page-level) | Funcional | Texto único no contexto do painel | Adicionar `data-testid` por item se automação for necessária |
-| Fechar painel (toggle) | `getByRole('button', { name: 'Notificações' }).click()` | Funcional | Segundo clique fecha; Escape NÃO fecha | Solicitar suporte a Escape (a11y) ao time de front-end |
+| Fechar painel (toggle) | `getByRole('button', { name: 'Notificações', exact: true }).click()` | Funcional | Segundo clique fecha; Escape NÃO fecha; `exact:true` evita ambiguidade com "Ver todas as notificações" | Solicitar suporte a Escape (a11y) |
 | Botão fechar (ícone-only) | `???` | **Ausente** | Sem aria-label, sem testId | Adicionar `aria-label="Fechar painel de downloads"` |
 | Botão "Prox" (paginação do painel) | Ambíguo com "Prox" da lista | **Frágil** | Mesmo texto, dois contextos simultâneos | Scoping pelo heading pai resolveria; ou testid distinto |
 
@@ -142,8 +143,8 @@ _Requer captura separada com timeout aumentado (>10s para carregamento da grid).
 
 | Elemento | Risco | Ação recomendada |
 |---|---|---|
-| Card empresa (`nth(1)`) | Alto — posição muda se uma empresa for adicionada antes de "inbot" | Solicitar `data-testid="empresa-{nome}"` no Card 11 ou Card adicional |
-| Combobox "N itens" (único na tela) | Médio — quebra se um segundo combobox for adicionado | Solicitar `aria-label="Itens por página"` |
+| ~~Card empresa (`nth(1)`)~~ ✅ RESOLVIDO | — | Front implementou `data-testid="empresa-card-{nome}"` (Card 3) — agora **Estável** |
+| ~~Combobox "N itens"~~ ✅ RESOLVIDO | — | Front implementou `aria-label="Itens por página"` (Card 4) — agora **Estável** |
 | `.first()` no botão "Abrir" | Médio — seleciona outra tabela se a ordem mudar | OK para smoke; usar row-scoped para testes de dados específicos |
 
 ### Locators totalmente ausentes (bloqueadores conhecidos)

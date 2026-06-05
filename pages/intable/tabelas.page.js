@@ -21,11 +21,9 @@ class TabelasPage {
     // Campo de busca de empresa na home page
     this.buscarEmpresaInput = page.getByRole('textbox', { name: 'Buscar empresa...' })
 
-    // Card da empresa "inbot" — confirmado via codegen: nth(1) é o card clicável
-    // (nth(0) é o div interno com somente o texto; nth(1) é o card com cursor=pointer)
-    // TODO: solicitar ao time de front-end data-testid="empresa-inbot" ou aria-label
-    // para eliminar a dependência de posição (nth).
-    this.empresaInbot = page.locator('div').filter({ hasText: /^inbot$/ }).nth(1)
+    // Card da empresa "inbot" — front-end já expõe data-testid estável (Card 3 implementado).
+    // Confirmado no DOM em 2026-06-04: <div data-testid="empresa-card-inbot" cursor:pointer>.
+    this.empresaInbot = page.getByTestId('empresa-card-inbot')
 
     // ─── /tables — lista de tabelas ───────────────────────────────────────────
 
@@ -62,18 +60,24 @@ class TabelasPage {
     this.btnProximo    = page.getByRole('button', { name: 'Prox' })
     this.btnAnterior   = page.getByRole('button', { name: 'Ant' })
 
-    // Combobox de tamanho de página — único combobox da tela de lista
-    // Confirmado via DOM snapshot: role=combobox, texto interno "10 itens"
-    // TODO: solicitar ao time de front-end aria-label="Itens por página" para eliminar
-    // dependência de posição e melhorar acessibilidade.
-    this.tamanhoPaginaCombobox = page.getByRole('combobox')
+    // Combobox de tamanho de página — front-end já expõe aria-label (Card 4 implementado).
+    // Confirmado no DOM em 2026-06-04: <button role="combobox" aria-label="Itens por página">.
+    this.tamanhoPaginaCombobox = page.getByRole('combobox', { name: 'Itens por página' })
   }
 
   /**
    * Navega para a home page. Com sessão ativa, carrega a tela de seleção de empresa.
    */
   async goto() {
-    await this.page.goto('/', { waitUntil: 'networkidle' })
+    // Navegar para '/' dispara um round-trip de SSO (Keycloak → volta com ?code) sempre
+    // que a sessão é reidratada/refrescada. NÃO usar 'networkidle': a InTable faz polling
+    // ao vivo (stats, "Pulsos do ecossistema") e a rede nunca fica ociosa → timeout
+    // intermitente. NÃO confiar só em 'domcontentloaded': ele retorna em uma página
+    // intermediária do redirect, antes da Home real. Critério robusto: navegar leve e
+    // então esperar a âncora estável da Home autenticada ("Buscar empresa..."), que
+    // sobrevive aos redirects e é o mesmo sinal usado no setup. (flake corrigido 2026-06-04)
+    await this.page.goto('/', { waitUntil: 'domcontentloaded' })
+    await this.buscarEmpresaInput.waitFor({ state: 'visible', timeout: 30_000 })
   }
 
   /**
@@ -84,9 +88,10 @@ class TabelasPage {
     if (nomeEmpresa === 'inbot') {
       await this.empresaInbot.click()
     } else {
-      // Para outras empresas: busca pelo nome no campo "Buscar empresa..." e clica no card
+      // Para outras empresas: busca pelo nome no campo "Buscar empresa..." e clica no card.
+      // Front expõe data-testid="empresa-card-{nome}" (padrão confirmado p/ inbot em 2026-06-04).
       await this.buscarEmpresaInput.fill(nomeEmpresa)
-      await this.page.locator('div').filter({ hasText: new RegExp(`^${nomeEmpresa}$`) }).nth(1).click()
+      await this.page.getByTestId(`empresa-card-${nomeEmpresa}`).click()
     }
     await this.waitForTabelasLoaded()
   }
@@ -132,7 +137,7 @@ class TabelasPage {
     await this.expandirFiltros()
     await this.selecionarDepartamento(nomeDept)
     await this.buscarButton.click()
-    await this.page.waitForLoadState('networkidle')
+    await this.page.waitForLoadState('domcontentloaded')
   }
 
   /**
@@ -161,7 +166,7 @@ class TabelasPage {
    */
   async abrirPrimeiraTabela() {
     await this.primeiroAbrirButton.click()
-    await this.page.waitForLoadState('networkidle')
+    await this.page.waitForLoadState('domcontentloaded')
   }
 
   /**
@@ -177,7 +182,7 @@ class TabelasPage {
    */
   async buscarTabela(termo) {
     await this.buscarTabelasInput.fill(termo)
-    await this.page.waitForLoadState('networkidle')
+    await this.page.waitForLoadState('domcontentloaded')
   }
 
   /**
@@ -185,7 +190,7 @@ class TabelasPage {
    */
   async limparBuscaTabela() {
     await this.buscarTabelasInput.fill('')
-    await this.page.waitForLoadState('networkidle')
+    await this.page.waitForLoadState('domcontentloaded')
   }
 
   /**

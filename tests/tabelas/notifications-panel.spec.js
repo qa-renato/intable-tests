@@ -24,8 +24,11 @@ test.describe('InTable — Painel de downloads (Notificações) @readonly', () =
     await tabelasPage.selecionarEmpresa('inbot')
     await expect(tabelasPage.buscarTabelasInput).toBeVisible()
 
-    // Botão de abertura do painel
-    const notifButton = page.getByRole('button', { name: 'Notificações' })
+    // Botão de abertura do painel.
+    // exact:true é obrigatório: quando o painel abre, surge um botão
+    // "Ver todas as notificações" cujo nome acessível contém "Notificações",
+    // o que viola o strict mode num match não-exato (achado 2026-06-04).
+    const notifButton = page.getByRole('button', { name: 'Notificações', exact: true })
     await expect(notifButton).toBeVisible()
     await notifButton.click()
 

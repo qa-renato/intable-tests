@@ -4,7 +4,7 @@ Automação E2E com Playwright para o InTable.
 Alvo: `https://intable.inbot.com.br`.
 
 Suítes existentes:
-- **@readonly** — 10 testes estáveis, execução padrão, sem side effects.
+- **@readonly** — 14 testes estáveis, execução padrão, sem side effects.
 - **@export** — base técnica criada, protegida por `ENABLE_EXPORT_TESTS=true`, bloqueada por seletor de front-end.
 - **@api-key** — base técnica criada, protegida por `ENABLE_API_KEY_TESTS=true`, bloqueada por seletor de front-end.
 - **@table-create** — base técnica criada, protegida por `ENABLE_DESTRUCTIVE=true` **e** `ENABLE_TABLE_CREATE_TESTS=true`, bloqueada por seletores de front-end.
@@ -122,7 +122,12 @@ npx playwright codegen \
 
 ## Cobertura atual
 
-**10 testes `@readonly` estáveis**, todos passando em execuções repetidas (30/30 na última validação, sem flake).
+**14 testes `@readonly` estáveis** (11 spec files), todos passando em execução normal (14/14 em 2026-06-04, ~1 min).
+
+> **Nota de estabilidade (2026-06-04):** em execução normal (suíte 1x) a cobertura é 100% verde.
+> Sob estresse (`--repeat-each=3`, dezenas de re-autenticações SSO em sequência) aparecem falhas
+> intermitentes no carregamento da Home — o app volta do Keycloak com `?code` e não renderiza
+> (fragilidade de refresh de token / CORS do stack Inbot, não da suíte). Não martelar o SSO em CI.
 
 | Spec | Cenário |
 |---|---|
@@ -213,7 +218,7 @@ npm run check:readonly # testes @readonly — requer sessão autenticada válida
 
 ## Próxima fase
 
-1. **Revisão de locators frágeis** — substituir `nth(1)` do card de empresa e combobox sem label por seletores estáveis, após solicitação ao time de front-end (`data-testid`, `aria-label`, `aria-sort`).
+1. ~~**Revisão de locators frágeis** — substituir `nth(1)` do card de empresa e combobox sem label por seletores estáveis.~~ ✅ **Feito (2026-06-04):** front entregou Cards 3 e 4; page object migrado para `getByTestId('empresa-card-inbot')` e `getByRole('combobox', { name: 'Itens por página' })`. Resta `aria-sort` (Card 5) para ordenação determinística.
 2. **Desbloqueio da suíte @export** — base criada em `tests/export/`. Bloqueada por `data-testid="table-actions-menu-button"` ausente no front-end (Card 8 em `docs/frontend-testability-tickets.md`).
 3. **Desbloqueio da suíte @api-key** — base criada em `tests/api-keys/`. Bloqueada por `data-testid="api-keys-menu-button"` ausente no front-end (Card 9 em `docs/frontend-testability-tickets.md`). Execução real validada até o ponto do bloqueio em 2026-05-11 — sessão ok, empresa selecionada, nenhuma chave criada.
 4. **Desbloqueio da suíte @table-create** — base criada em `tests/tables-create/`. Bloqueada por 7 seletores ausentes no front-end (Card 10 em `docs/frontend-testability-tickets.md`). Nenhuma execução real realizada. Protegida por `ENABLE_DESTRUCTIVE=true` + `ENABLE_TABLE_CREATE_TESTS=true`.
